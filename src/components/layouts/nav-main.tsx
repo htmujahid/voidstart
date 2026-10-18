@@ -1,0 +1,29 @@
+"use client";
+
+import { Link } from "@tanstack/react-router";
+
+import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "@/components/ui/sidebar";
+
+export function NavMain({
+  items,
+}: {
+  items: {
+    title: string;
+    url: string;
+    icon: React.ReactNode;
+    isActive?: boolean;
+  }[];
+}) {
+  return (
+    <SidebarMenu className="gap-1">
+      {items.map((item) => (
+        <SidebarMenuItem key={item.title}>
+          <SidebarMenuButton isActive={item.isActive} render={<Link to={item.url} />}>
+            {item.icon}
+            <span>{item.title}</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      ))}
+    </SidebarMenu>
+  );
+}

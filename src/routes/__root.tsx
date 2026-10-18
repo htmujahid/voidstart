@@ -1,8 +1,7 @@
-import { Link, Outlet, createRootRoute, redirect } from "@tanstack/react-router";
+import { Outlet, createRootRoute, redirect } from "@tanstack/react-router";
 import { auth } from "void/client/react";
 
 import { Toaster } from "@/components/ui/toast";
-import { SignOutButton } from "@/components/auth/sign-out-button";
 import "../styles.css";
 
 export const Route = createRootRoute({
@@ -23,17 +22,8 @@ export const Route = createRootRoute({
 });
 
 function RootComponent() {
-  const { user } = Route.useRouteContext();
   return (
     <Toaster>
-      {user && (
-        <nav className="flex items-center gap-4 p-4">
-          <Link to="/">Home</Link>
-          <Link to="/about">About</Link>
-          <span className="ml-auto text-sm text-muted-foreground">{user.email}</span>
-          <SignOutButton />
-        </nav>
-      )}
       <Outlet />
     </Toaster>
   );

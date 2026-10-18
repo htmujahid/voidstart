@@ -1,37 +1,13 @@
 import { queryOptions } from "@tanstack/react-query";
 
-export type AuthConfig = {
-  appName: string;
-  emailAndPassword: {
-    enabled: boolean;
-    signUp: boolean;
-    requireEmailVerification: boolean;
-    autoSignIn: boolean;
-    resetPassword: boolean;
-    minPasswordLength: number;
-    maxPasswordLength: number;
-  };
-  emailVerification: {
-    enabled: boolean;
-    sendOnSignUp: boolean;
-    sendOnSignIn: boolean;
-    autoSignInAfterVerification: boolean;
-  };
-  socialProviders: string[];
-  user: {
-    changeEmail: boolean;
-    deleteUser: boolean;
-  };
-};
-
-async function fetchAuthConfig(): Promise<AuthConfig> {
-  const res = await fetch("/api/auth/config");
-  if (!res.ok) throw new Error(`Failed to load auth config (${res.status})`);
-  return (await res.json()) as AuthConfig;
-}
+import { authClient } from "@/lib/auth/auth-client";
 
 export const authConfigQueryOptions = queryOptions({
   queryKey: ["auth", "config"],
-  queryFn: fetchAuthConfig,
+  queryFn: async () => {
+    const { data, error } = await authClient.config();
+    if (error) throw new Error(error.message ?? `Failed to load auth config (${error.status})`);
+    return data;
+  },
   staleTime: 5 * 60_000,
 });

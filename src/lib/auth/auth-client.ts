@@ -1,3 +1,7 @@
 import { createAuthClient } from "better-auth/react";
 
-export const authClient = createAuthClient();
+import { authConfigClient } from "./auth-config-client";
+
+export const authClient = createAuthClient({
+  plugins: [authConfigClient()],
+});

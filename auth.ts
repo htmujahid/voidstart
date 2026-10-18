@@ -17,7 +17,7 @@ export default defineAuth(({ defaults }) => ({
       if (!result.ok) console.error("Failed to send reset email", result);
     },
   },
-  plugins: [authConfigPlugin],
+  plugins: [authConfigPlugin()],
   emailVerification: {
     sendOnSignUp: true,
     sendOnSignIn: true,

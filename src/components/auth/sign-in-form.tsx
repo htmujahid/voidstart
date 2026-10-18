@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useRouter } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
-import { auth } from "void/client/react";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { safeRedirect } from "@/lib/redirect";
 import { AuthCard } from "./auth-card";
+import { SocialProviders } from "./social-providers";
 import { VerifyEmailNotice } from "./verify-email-notice";
 import { signInSchema } from "./schemas";
 
@@ -21,9 +22,8 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
     defaultValues: { email: "", password: "" },
     validators: { onSubmit: signInSchema },
     onSubmit: async ({ value }) => {
-      const { error } = await auth.signIn.email(value);
+      const { error } = await authClient.signIn.email(value);
       if (error?.code === "EMAIL_NOT_VERIFIED") {
-        // sendOnSignIn re-sends the link; just tell the user.
         setUnverifiedEmail(value.email);
         toast.add({
           type: "info",
@@ -56,6 +56,7 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
           }}
         >
           <FieldGroup>
+            <SocialProviders action="Sign in" redirectTo={redirectTo} />
             <form.Field name="email">
               {(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;

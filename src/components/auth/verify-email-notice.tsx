@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { auth } from "void/client/react";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { FieldDescription, FieldGroup } from "@/components/ui/field";
@@ -13,7 +13,7 @@ export function VerifyEmailNotice({ email, redirectTo }: { email: string; redire
 
   async function resend() {
     setStatus("sending");
-    const { error } = await auth.sendVerificationEmail({
+    const { error } = await authClient.sendVerificationEmail({
       email,
       callbackURL: safeRedirect(redirectTo),
     });

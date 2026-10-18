@@ -1,4 +1,4 @@
-import { HTTPException } from 'hono/http-exception';
+import { HTTPException } from "hono/http-exception";
 
 export const conflictError = (message: string) =>
   new HTTPException(409, {

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
-import { auth } from "void/client/react";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -29,7 +29,7 @@ export function ResetPasswordForm({ token }: { token?: string }) {
     validators: { onSubmit: resetPasswordSchema },
     onSubmit: async ({ value }) => {
       if (!token) return;
-      const { error } = await auth.resetPassword({
+      const { error } = await authClient.resetPassword({
         newPassword: value.password,
         token,
       });

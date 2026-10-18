@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
-import { auth } from "void/client/react";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -15,7 +15,7 @@ export function ForgotPasswordForm() {
     defaultValues: { email: "" },
     validators: { onSubmit: forgotPasswordSchema },
     onSubmit: async ({ value }) => {
-      const { error } = await auth.requestPasswordReset({
+      const { error } = await authClient.requestPasswordReset({
         email: value.email,
         redirectTo: "/auth/reset-password",
       });

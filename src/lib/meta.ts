@@ -4,7 +4,7 @@ export type TableMeta = {
 
 export type ColumnMeta = {
   label: string;
-  type: 'text' | 'number' | 'enum' | 'datetime';
+  type: "text" | "number" | "enum" | "datetime";
   /** Allowed values, for `enum` columns. */
   options?: readonly string[];
   sortable?: boolean;

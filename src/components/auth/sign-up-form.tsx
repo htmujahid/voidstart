@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
-import { auth } from "void/client/react";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
@@ -10,6 +10,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { safeRedirect } from "@/lib/redirect";
 import { AuthCard } from "./auth-card";
+import { SocialProviders } from "./social-providers";
 import { VerifyEmailNotice } from "./verify-email-notice";
 import { signUpSchema } from "./schemas";
 
@@ -21,8 +22,7 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
     validators: { onSubmit: signUpSchema },
     onSubmit: async ({ value }) => {
       const { email, password } = value;
-      const { error } = await auth.signUp.email({
-        // Better Auth requires a name; use the email handle until profiles exist.
+      const { error } = await authClient.signUp.email({
         name: email.split("@")[0],
         email,
         password,
@@ -36,7 +36,6 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
         });
         return;
       }
-      // Email verification is required, so there is no session yet.
       setSentTo(email);
       toast.add({
         type: "success",
@@ -58,6 +57,7 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
           }}
         >
           <FieldGroup>
+            <SocialProviders action="Sign up" redirectTo={redirectTo} />
             <form.Field name="email">
               {(field) => {
                 const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;

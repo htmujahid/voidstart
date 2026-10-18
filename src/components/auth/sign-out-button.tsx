@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { auth } from "void/client/react";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { Button } from "@/components/ui/button";
 
@@ -10,7 +10,7 @@ export function SignOutButton() {
       variant="outline"
       size="sm"
       onClick={async () => {
-        await auth.signOut();
+        await authClient.signOut();
         await navigate({ to: "/auth/sign-in" });
       }}
     >

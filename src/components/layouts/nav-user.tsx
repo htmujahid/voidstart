@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { auth } from "void/client/react";
+import { authClient } from "@/lib/auth/auth-client";
 
 import { useUser } from "@/hooks/use-user";
 
@@ -98,7 +98,7 @@ export function NavUser() {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={async () => {
-                await auth.signOut();
+                await authClient.signOut();
                 await navigate({ to: "/auth/sign-in" });
               }}
             >

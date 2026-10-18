@@ -1,11 +1,13 @@
 import { Link, Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { Logo } from "@/components/logo";
-// Signed-in users have no business on the auth pages.
+import { authConfigQueryOptions } from "@/lib/queries/auth";
+
 export const Route = createFileRoute("/auth")({
   beforeLoad: ({ context }) => {
     if (context.user) throw redirect({ to: "/" });
   },
+  loader: ({ context: { queryClient } }) => queryClient.query(authConfigQueryOptions),
   component: AuthLayout,
 });
 

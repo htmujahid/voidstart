@@ -1,5 +1,7 @@
-import { defineAuth } from 'void/auth';
-import { sendEmail } from 'void/email';
+import { defineAuth } from "void/auth";
+import { sendEmail } from "void/email";
+
+import { authConfigPlugin } from "./src/lib/auth/auth-config-plugin.ts";
 
 export default defineAuth(({ defaults }) => ({
   ...defaults,
@@ -9,12 +11,13 @@ export default defineAuth(({ defaults }) => ({
     sendResetPassword: async ({ user, url }) => {
       const result = await sendEmail({
         to: user.email,
-        subject: 'Reset your password',
+        subject: "Reset your password",
         text: `Hi ${user.name},\n\nReset your password using this link:\n${url}\n\nIf you didn't request this, you can ignore this email.`,
       });
-      if (!result.ok) console.error('Failed to send reset email', result);
+      if (!result.ok) console.error("Failed to send reset email", result);
     },
   },
+  plugins: [authConfigPlugin],
   emailVerification: {
     sendOnSignUp: true,
     sendOnSignIn: true,
@@ -22,10 +25,10 @@ export default defineAuth(({ defaults }) => ({
     sendVerificationEmail: async ({ user, url }) => {
       const result = await sendEmail({
         to: user.email,
-        subject: 'Verify your email address',
+        subject: "Verify your email address",
         text: `Hi ${user.name},\n\nConfirm your email address using this link:\n${url}\n\nIf you didn't create an account, you can ignore this email.`,
       });
-      if (!result.ok) console.error('Failed to send verification email', result);
+      if (!result.ok) console.error("Failed to send verification email", result);
     },
   },
 }));

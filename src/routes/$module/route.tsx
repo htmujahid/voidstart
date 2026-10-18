@@ -1,5 +1,5 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
-import { AppSidebar } from "@/components/layouts/app-sidebar"
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { AppSidebar } from "@/components/layouts/app-sidebar";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -7,17 +7,13 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { SidebarInset, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 
-export const Route = createFileRoute('/$module')({
+export const Route = createFileRoute("/$module")({
   component: RouteComponent,
-})
+});
 
 export default function RouteComponent() {
   return (
@@ -34,9 +30,7 @@ export default function RouteComponent() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="#">
-                    Build Your Application
-                  </BreadcrumbLink>
+                  <BreadcrumbLink href="#">Build Your Application</BreadcrumbLink>
                 </BreadcrumbItem>
                 <BreadcrumbSeparator className="hidden md:block" />
                 <BreadcrumbItem>
@@ -51,5 +45,5 @@ export default function RouteComponent() {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }

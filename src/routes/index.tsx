@@ -7,7 +7,7 @@ function Home() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch("/api/hello")
+    void fetch("/api/hello")
       .then((res) => res.json() as Promise<{ message: string }>)
       .then((data) => setMessage(data.message));
   }, []);

@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { FieldDescription, FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth/auth-client";
 import { safeRedirect } from "@/lib/redirect";
 
 export function VerifyEmailNotice({ email, redirectTo }: { email: string; redirectTo?: string }) {

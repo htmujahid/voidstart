@@ -1,9 +1,19 @@
 import { fileURLToPath } from "node:url";
-import { defineConfig } from "vite";
-import { voidPlugin } from "void";
-import react from "@vitejs/plugin-react";
+
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
-import tailwindcss from '@tailwindcss/vite'
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite-plus";
+import { voidPlugin } from "void";
+
+const generated = [
+  "dist/**",
+  ".void/**",
+  ".tanstack/**",
+  "src/routeTree.gen.ts",
+  "db/migrations/**",
+];
+const vendored = ["src/components/ui/**", ".agents/**", ".claude/**"];
 
 export default defineConfig({
   resolve: {
@@ -15,4 +25,47 @@ export default defineConfig({
     tailwindcss(),
     voidPlugin(),
   ],
+  fmt: {
+    sortImports: {
+      customGroups: [
+        {
+          groupName: "react",
+          elementNamePattern: ["react", "react/**", "react-dom", "react-dom/**"],
+        },
+        { groupName: "tanstack", elementNamePattern: ["@tanstack/**"] },
+      ],
+      groups: [
+        "builtin",
+        "react",
+        { newlinesBetween: false },
+        "tanstack",
+        { newlinesBetween: false },
+        "external",
+        ["internal", "subpath"],
+        ["parent", "sibling", "index"],
+        "style",
+        "unknown",
+      ],
+    },
+    ignorePatterns: [...generated, ...vendored, "pnpm-lock.yaml", "AGENTS.md"],
+  },
+  lint: {
+    ignorePatterns: [...generated, ...vendored],
+    plugins: ["typescript", "react", "jsx-a11y", "import", "promise", "oxc"],
+    categories: { correctness: "error", suspicious: "warn" },
+    rules: {
+      "no-console": ["warn", { allow: ["error", "warn"] }],
+      "react/react-in-jsx-scope": "off",
+      "react/set-state-in-effect": "warn",
+      "jsx-a11y/control-has-associated-label": "off",
+      "import/no-unassigned-import": "off",
+      "typescript/no-unsafe-type-assertion": "off",
+      "react/rules-of-hooks": "error",
+      "react/exhaustive-deps": "warn",
+    },
+    options: {
+      typeAware: true,
+      typeCheck: true,
+    },
+  },
 });

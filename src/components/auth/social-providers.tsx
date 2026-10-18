@@ -1,13 +1,14 @@
 import { useState } from "react";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth/auth-client";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldSeparator } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth/auth-client";
 import { authConfigQueryOptions } from "@/lib/queries/auth";
 import { safeRedirect } from "@/lib/redirect";
+
 import { socialIcons } from "./social-icons";
 
 const socialProviders = {

@@ -1,7 +1,12 @@
 import { useNavigate } from "@tanstack/react-router";
-import { authClient } from "@/lib/auth/auth-client";
-
-import { useUser } from "@/hooks/use-user";
+import {
+  ChevronsUpDownIcon,
+  SparklesIcon,
+  BadgeCheckIcon,
+  CreditCardIcon,
+  BellIcon,
+  LogOutIcon,
+} from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -19,14 +24,8 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import {
-  ChevronsUpDownIcon,
-  SparklesIcon,
-  BadgeCheckIcon,
-  CreditCardIcon,
-  BellIcon,
-  LogOutIcon,
-} from "lucide-react";
+import { useUser } from "@/hooks/use-user";
+import { authClient } from "@/lib/auth/auth-client";
 
 export function NavUser() {
   const { isMobile } = useSidebar();

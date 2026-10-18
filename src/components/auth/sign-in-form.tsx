@@ -1,18 +1,19 @@
 import { useState } from "react";
-import { Link, useRouter } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
-import { authClient } from "@/lib/auth/auth-client";
+import { Link, useRouter } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth/auth-client";
 import { safeRedirect } from "@/lib/redirect";
+
 import { AuthCard } from "./auth-card";
+import { signInSchema } from "./schemas";
 import { SocialProviders } from "./social-providers";
 import { VerifyEmailNotice } from "./verify-email-notice";
-import { signInSchema } from "./schemas";
 
 export function SignInForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
@@ -52,7 +53,7 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
         >
           <FieldGroup>

@@ -1,12 +1,13 @@
-import { conflictError } from '@/lib/errors';
-import { projectsRepository } from './projects.repository';
-import type { NewProject } from './projects.schema';
+import { conflictError } from "@/lib/errors";
 
-type ProjectInput = Omit<NewProject, 'id' | 'createdAt' | 'updatedAt'>;
+import { projectsRepository } from "./projects.repository";
+import type { NewProject } from "./projects.schema";
+
+type ProjectInput = Omit<NewProject, "id" | "createdAt" | "updatedAt">;
 
 async function assertSlugAvailable(slug: string, exceptId?: number) {
   const existing = await projectsRepository.findBySlug(slug);
-  if (existing && existing.id !== exceptId) throw conflictError('Slug already in use');
+  if (existing && existing.id !== exceptId) throw conflictError("Slug already in use");
 }
 
 export const projectsHooks = {

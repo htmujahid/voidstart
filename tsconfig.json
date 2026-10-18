@@ -9,9 +9,7 @@
     "allowImportingTsExtensions": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": [
-      "void/env"
-    ],
+    "types": ["void/env"],
     "jsx": "react-jsx",
     "paths": {
       "@/*": ["./src/*"],
@@ -21,13 +19,5 @@
       "@schema/*": ["./db/schema/*"]
     }
   },
-  "include": [
-    "auth.ts",
-    "src",
-    "routes",
-    "middleware",
-    "crons",
-    "queues",
-    "db"
-  ]
+  "include": ["auth.ts", "src", "routes", "middleware", "crons", "queues", "db"]
 }

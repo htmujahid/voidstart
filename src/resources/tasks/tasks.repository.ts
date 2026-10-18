@@ -1,5 +1,6 @@
-import { db, desc, eq } from 'void/db';
-import { tasks, type NewTask, type Task } from './tasks.schema';
+import { db, desc, eq } from "void/db";
+
+import { tasks, type NewTask, type Task } from "./tasks.schema";
 
 export const tasksRepository = {
   async findAll(): Promise<Task[]> {
@@ -11,14 +12,14 @@ export const tasksRepository = {
     return row;
   },
 
-  async create(data: Omit<NewTask, 'id' | 'createdAt' | 'updatedAt'>): Promise<Task> {
+  async create(data: Omit<NewTask, "id" | "createdAt" | "updatedAt">): Promise<Task> {
     const [row] = await db.insert(tasks).values(data).returning();
     return row;
   },
 
   async update(
     id: number,
-    data: Partial<Omit<NewTask, 'id' | 'createdAt' | 'updatedAt'>>,
+    data: Partial<Omit<NewTask, "id" | "createdAt" | "updatedAt">>,
   ): Promise<Task | undefined> {
     const [row] = await db.update(tasks).set(data).where(eq(tasks.id, id)).returning();
     return row;

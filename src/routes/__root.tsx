@@ -1,9 +1,10 @@
 import { Suspense, lazy } from "react";
-import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
-import { authClient } from "@/lib/auth/auth-client";
+import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
 
 import { Toaster } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth/auth-client";
+
 import "../styles.css";
 
 const Devtools = import.meta.env.DEV

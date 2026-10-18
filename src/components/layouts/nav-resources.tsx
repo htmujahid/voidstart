@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ChevronRightIcon } from "lucide-react";
 
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
@@ -11,7 +12,6 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
-import { ChevronRightIcon } from "lucide-react";
 
 export function NavResources({
   items,

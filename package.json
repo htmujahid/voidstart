@@ -6,7 +6,10 @@
     "dev": "vp dev",
     "build": "vp build",
     "preview": "vp preview",
-    "db": "void db"
+    "db": "void db",
+    "fmt": "vp fmt",
+    "lint": "vp lint",
+    "check": "vp check"
   },
   "dependencies": {
     "@base-ui/react": "^1.9.0",

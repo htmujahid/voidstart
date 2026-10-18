@@ -1,12 +1,13 @@
-import { Link } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
-import { authClient } from "@/lib/auth/auth-client";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth/auth-client";
+
 import { AuthCard } from "./auth-card";
 import { forgotPasswordSchema } from "./schemas";
 
@@ -44,7 +45,7 @@ export function ForgotPasswordForm() {
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          form.handleSubmit();
+          void form.handleSubmit();
         }}
       >
         <FieldGroup>

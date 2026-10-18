@@ -1,5 +1,6 @@
-import { db, desc, eq } from 'void/db';
-import { projects, type NewProject, type Project } from './projects.schema';
+import { db, desc, eq } from "void/db";
+
+import { projects, type NewProject, type Project } from "./projects.schema";
 
 export const projectsRepository = {
   async findAll(): Promise<Project[]> {
@@ -16,21 +17,24 @@ export const projectsRepository = {
     return row;
   },
 
-  async create(data: Omit<NewProject, 'id' | 'createdAt' | 'updatedAt'>): Promise<Project> {
+  async create(data: Omit<NewProject, "id" | "createdAt" | "updatedAt">): Promise<Project> {
     const [row] = await db.insert(projects).values(data).returning();
     return row;
   },
 
   async update(
     id: number,
-    data: Partial<Omit<NewProject, 'id' | 'createdAt' | 'updatedAt'>>,
+    data: Partial<Omit<NewProject, "id" | "createdAt" | "updatedAt">>,
   ): Promise<Project | undefined> {
     const [row] = await db.update(projects).set(data).where(eq(projects.id, id)).returning();
     return row;
   },
 
   async delete(id: number): Promise<boolean> {
-    const rows = await db.delete(projects).where(eq(projects.id, id)).returning({ id: projects.id });
+    const rows = await db
+      .delete(projects)
+      .where(eq(projects.id, id))
+      .returning({ id: projects.id });
     return rows.length > 0;
   },
 };

@@ -1,26 +1,26 @@
-import { index, integer, sqliteTable, text } from 'void/schema-d1';
-import { createSelectSchema ,createInsertSchema, createUpdateSchema } from 'void/drizzle-zod';
-import { z } from 'zod';
+import { createSelectSchema, createInsertSchema, createUpdateSchema } from "void/drizzle-zod";
+import { index, integer, sqliteTable, text } from "void/schema-d1";
+import { z } from "zod";
 
 export const projects = sqliteTable(
-  'projects',
+  "projects",
   {
-    id: integer('id').primaryKey({ autoIncrement: true }),
-    name: text('name').notNull(),
-    slug: text('slug').notNull().unique(),
-    description: text('description'),
-    status: text('status', { enum: ['active', 'archived'] })
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    name: text("name").notNull(),
+    slug: text("slug").notNull().unique(),
+    description: text("description"),
+    status: text("status", { enum: ["active", "archived"] })
       .notNull()
-      .default('active'),
-    createdAt: text('created_at')
+      .default("active"),
+    createdAt: text("created_at")
       .notNull()
       .$defaultFn(() => new Date().toISOString()),
-    updatedAt: text('updated_at')
+    updatedAt: text("updated_at")
       .notNull()
       .$defaultFn(() => new Date().toISOString())
       .$onUpdate(() => new Date().toISOString()),
   },
-  (table) => [index('projects_status_idx').on(table.status)],
+  (table) => [index("projects_status_idx").on(table.status)],
 );
 
 export type Project = typeof projects.$inferSelect;

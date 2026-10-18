@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { ChevronsUpDownIcon } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -17,7 +18,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ChevronsUpDownIcon } from "lucide-react";
 
 export function ModuleSwitcher({
   modules,

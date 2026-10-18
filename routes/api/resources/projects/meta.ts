@@ -1,11 +1,12 @@
-import { defineHandler } from 'void';
-import { z } from 'zod';
-import { projectsColumnsMeta, projectsTableMeta } from '@/resources/projects/projects.meta';
+import { defineHandler } from "void";
+import { z } from "zod";
+
+import { projectsColumnsMeta, projectsTableMeta } from "@/resources/projects/projects.meta";
 import {
   projectsInsertSchema,
   projectsSelectSchema,
   projectsUpdateSchema,
-} from '@/resources/projects/projects.schema';
+} from "@/resources/projects/projects.schema";
 
 const schemas = {
   select: z.toJSONSchema(projectsSelectSchema),

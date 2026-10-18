@@ -1,7 +1,7 @@
 import { useEffect } from "react";
+import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { Link, useRouter } from "@tanstack/react-router";
 import type { ErrorComponentProps } from "@tanstack/react-router";
-import { useQueryErrorResetBoundary } from "@tanstack/react-query";
 import { TriangleAlertIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";

@@ -1,18 +1,19 @@
 import { useState } from "react";
-import { Link } from "@tanstack/react-router";
 import { useForm } from "@tanstack/react-form";
-import { authClient } from "@/lib/auth/auth-client";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { authClient } from "@/lib/auth/auth-client";
 import { safeRedirect } from "@/lib/redirect";
+
 import { AuthCard } from "./auth-card";
+import { signUpSchema } from "./schemas";
 import { SocialProviders } from "./social-providers";
 import { VerifyEmailNotice } from "./verify-email-notice";
-import { signUpSchema } from "./schemas";
 
 export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
   const [sentTo, setSentTo] = useState<string | null>(null);
@@ -53,7 +54,7 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            form.handleSubmit();
+            void form.handleSubmit();
           }}
         >
           <FieldGroup>

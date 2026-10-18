@@ -1,8 +1,9 @@
-import { defineHandler } from 'void';
-import { tasksEvents } from '@/resources/tasks/tasks.event';
-import { tasksHooks } from '@/resources/tasks/tasks.hooks';
-import { tasksRepository } from '@/resources/tasks/tasks.repository';
-import { tasksInsertSchema } from '@/resources/tasks/tasks.schema';
+import { defineHandler } from "void";
+
+import { tasksEvents } from "@/resources/tasks/tasks.event";
+import { tasksHooks } from "@/resources/tasks/tasks.hooks";
+import { tasksRepository } from "@/resources/tasks/tasks.repository";
+import { tasksInsertSchema } from "@/resources/tasks/tasks.schema";
 
 export const GET = defineHandler(async () => {
   return tasksRepository.findAll();
@@ -13,6 +14,6 @@ export const POST = defineHandler.withValidator({
 })(async (c, { body }) => {
   const data = await tasksHooks.beforeCreate(body);
   const task = await tasksRepository.create(data);
-  tasksEvents.emit(c, 'task:created', task);
+  tasksEvents.emit(c, "task:created", task);
   return c.json(task, 201);
 });

@@ -1,4 +1,5 @@
 import { createFileRoute, Outlet } from "@tanstack/react-router";
+
 import { AppSidebar } from "@/components/layouts/app-sidebar";
 import {
   Breadcrumb,

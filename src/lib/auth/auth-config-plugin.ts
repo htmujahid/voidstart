@@ -10,7 +10,7 @@ export const authConfigPlugin = {
   onRequest: async (request, ctx) => {
     const { options } = ctx;
     const path = `${options.basePath ?? "/api/auth"}/config`;
-    if (request.method !== "GET" || new URL(request.url).pathname !== path) return;
+    if (request.method !== "GET" || new URL(request.url).pathname !== path) return undefined;
 
     const { emailAndPassword, emailVerification, user } = options;
 

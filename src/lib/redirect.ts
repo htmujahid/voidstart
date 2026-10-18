@@ -17,3 +17,9 @@ export function safeRedirect(path?: string) {
   }
   return path;
 }
+
+export function verifyEmailCallbackURL(redirectTo?: string) {
+  const target = safeRedirect(redirectTo);
+  if (target === "/") return "/auth/verify-email";
+  return `/auth/verify-email?redirect=${encodeURIComponent(target)}`;
+}

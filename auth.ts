@@ -71,5 +71,9 @@ export default defineAuth(({ defaults }) => ({
       updateUserInfoOnLink: false,
     },
   },
+  onAPIError: {
+    throw: false,
+    errorURL: "/auth/error",
+  },
   plugins: [authConfigPlugin()],
 }));

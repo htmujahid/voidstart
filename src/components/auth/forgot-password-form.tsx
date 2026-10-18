@@ -8,13 +8,14 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
+import { formatDuration } from "@/lib/duration";
 
 import { AuthCard } from "./auth-card";
 import { AuthNotice } from "./auth-notice";
 import { forgotPasswordSchema } from "./schemas";
 
 export function ForgotPasswordForm() {
-  const { canResetPassword } = useAuthConfig();
+  const { canResetPassword, emailAndPassword } = useAuthConfig();
   const form = useForm({
     defaultValues: { email: "" },
     validators: { onSubmit: forgotPasswordSchema },
@@ -34,7 +35,7 @@ export function ForgotPasswordForm() {
       toast.add({
         type: "success",
         title: "Check your email",
-        description: `If an account exists for ${value.email}, a reset link is on its way.`,
+        description: `If an account exists for ${value.email}, a reset link is on its way. It expires in ${formatDuration(emailAndPassword.resetPasswordTokenExpiresIn)}.`,
       });
       form.reset();
     },

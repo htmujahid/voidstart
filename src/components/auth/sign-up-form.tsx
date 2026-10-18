@@ -9,7 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
-import { safeRedirect } from "@/lib/redirect";
+import { safeRedirect, verifyEmailCallbackURL } from "@/lib/redirect";
 
 import { AuthCard } from "./auth-card";
 import { AuthNotice } from "./auth-notice";
@@ -37,7 +37,7 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
         name: email.split("@")[0],
         email,
         password,
-        callbackURL: safeRedirect(redirectTo),
+        callbackURL: verifyEmailCallbackURL(redirectTo),
       });
       if (error) {
         toast.add({

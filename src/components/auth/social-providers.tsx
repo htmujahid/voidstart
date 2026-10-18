@@ -99,7 +99,7 @@ export function SocialProviders({
     const { error } = await authClient.signIn.social({
       provider,
       callbackURL: safeRedirect(redirectTo),
-      errorCallbackURL: "/auth/sign-in",
+      errorCallbackURL: "/auth/error",
     });
     if (error) {
       setPending(null);

@@ -17,6 +17,7 @@ export const authConfigPlugin = () =>
             requireEmailVerification: emailAndPassword?.requireEmailVerification ?? false,
             autoSignIn: emailAndPassword?.autoSignIn ?? true,
             resetPassword: typeof emailAndPassword?.sendResetPassword === "function",
+            resetPasswordTokenExpiresIn: emailAndPassword?.resetPasswordTokenExpiresIn ?? 60 * 60,
             minPasswordLength: password.config.minPasswordLength,
             maxPasswordLength: password.config.maxPasswordLength,
           },
@@ -25,6 +26,7 @@ export const authConfigPlugin = () =>
             sendOnSignUp: emailVerification?.sendOnSignUp ?? false,
             sendOnSignIn: emailVerification?.sendOnSignIn ?? false,
             autoSignInAfterVerification: emailVerification?.autoSignInAfterVerification ?? false,
+            expiresIn: emailVerification?.expiresIn ?? 60 * 60,
           },
           socialProviders: socialProviders.map((provider) => provider.id),
           user: {

@@ -9,7 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
-import { safeRedirect } from "@/lib/redirect";
+import { safeRedirect, verifyEmailCallbackURL } from "@/lib/redirect";
 
 import { AuthCard } from "./auth-card";
 import { signInSchema } from "./schemas";
@@ -26,7 +26,10 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
     defaultValues: { email: "", password: "" },
     validators: { onSubmit: signInSchema },
     onSubmit: async ({ value }) => {
-      const { error } = await authClient.signIn.email(value);
+      const { error } = await authClient.signIn.email({
+        ...value,
+        callbackURL: verifyEmailCallbackURL(redirectTo),
+      });
       if (error?.code === "EMAIL_NOT_VERIFIED") {
         setUnverifiedEmail(value.email);
         toast.add({

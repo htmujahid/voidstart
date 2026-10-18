@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import {
   ChevronsUpDownIcon,
   SparklesIcon,
@@ -24,12 +24,12 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { useUser } from "@/hooks/use-user";
-import { authClient } from "@/lib/auth/auth-client";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
-  const navigate = useNavigate();
+  const signOut = useSignOut();
   const user = useUser();
   if (!user) return null;
 
@@ -81,7 +81,7 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem render={<Link to="/account/profile" />}>
                 <BadgeCheckIcon />
                 Account
               </DropdownMenuItem>
@@ -95,12 +95,7 @@ export function NavUser() {
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={async () => {
-                await authClient.signOut();
-                await navigate({ to: "/auth/sign-in" });
-              }}
-            >
+            <DropdownMenuItem onClick={signOut}>
               <LogOutIcon />
               Log out
             </DropdownMenuItem>

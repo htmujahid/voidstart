@@ -16,5 +16,6 @@ export function useAuthConfig() {
     canSignIn: emailSignIn || hasSocial,
     canSignUp: emailSignUp || hasSocial,
     canResetPassword: emailSignIn && emailAndPassword.resetPassword,
+    canLinkAccounts: data.account.linking && hasSocial,
   };
 }

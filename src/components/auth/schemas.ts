@@ -7,7 +7,7 @@ export interface PasswordRules {
   maxPasswordLength: number;
 }
 
-const createPasswordSchema = ({ minPasswordLength, maxPasswordLength }: PasswordRules) =>
+export const createPasswordSchema = ({ minPasswordLength, maxPasswordLength }: PasswordRules) =>
   z
     .string()
     .min(minPasswordLength, `Password must be at least ${minPasswordLength} characters.`)

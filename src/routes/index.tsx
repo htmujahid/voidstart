@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { SiteHeader } from "@/components/layouts/site-header";
+
 export const Route = createFileRoute("/")({ component: Home });
 
 function Home() {
@@ -13,9 +15,12 @@ function Home() {
   }, []);
 
   return (
-    <main>
-      <h1>locosheet</h1>
-      <p>{message || "Loading..."}</p>
-    </main>
+    <div className="flex min-h-svh flex-col">
+      <SiteHeader />
+      <main className="mx-auto w-full max-w-5xl p-4 md:p-6">
+        <h1 className="text-2xl font-semibold">locosheet</h1>
+        <p className="text-muted-foreground">{message || "Loading..."}</p>
+      </main>
+    </div>
   );
 }

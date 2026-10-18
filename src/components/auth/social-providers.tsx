@@ -72,7 +72,7 @@ export function isSocialProvider(value: string): value is SocialProvider {
   return value in socialProviders;
 }
 
-function getSocialProvider(id: string) {
+export function getSocialProvider(id: string) {
   if (isSocialProvider(id)) return socialProviders[id];
   return {
     name: id.charAt(0).toUpperCase() + id.slice(1),

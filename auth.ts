@@ -44,8 +44,16 @@ export default defineAuth(({ defaults }) => ({
       updateEmailWithoutVerification: false,
     },
     deleteUser: {
-      enabled: false,
+      enabled: true,
       deleteTokenExpiresIn: 60 * 60 * 24,
+      sendDeleteAccountVerification: async ({ user, url }) => {
+        const result = await sendEmail({
+          to: user.email,
+          subject: "Confirm account deletion",
+          text: `Hi ${user.name},\n\nConfirm that you want to permanently delete your account using this link:\n${url}\n\nIf you didn't request this, you can ignore this email.`,
+        });
+        if (!result.ok) console.error("Failed to send delete account email", result);
+      },
     },
   },
   session: {

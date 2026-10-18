@@ -4,6 +4,7 @@ import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-ro
 
 import { Toaster } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth/auth-client";
+import { authConfigQueryOptions } from "@/lib/queries/auth";
 
 import "../styles.css";
 
@@ -22,8 +23,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         search: { redirect: location.href },
       });
     }
-    return { user };
+    return { user, session: data?.session ?? null };
   },
+  loader: ({ context: { queryClient } }) => queryClient.query(authConfigQueryOptions),
   component: RootComponent,
 });
 

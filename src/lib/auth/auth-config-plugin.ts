@@ -7,7 +7,7 @@ export const authConfigPlugin = () =>
     endpoints: {
       getConfig: createAuthEndpoint("/config", { method: "GET" }, async (ctx) => {
         const { options, appName, password, socialProviders } = ctx.context;
-        const { emailAndPassword, emailVerification, user } = options;
+        const { emailAndPassword, emailVerification, user, account } = options;
 
         return ctx.json({
           appName,
@@ -29,9 +29,15 @@ export const authConfigPlugin = () =>
             expiresIn: emailVerification?.expiresIn ?? 60 * 60,
           },
           socialProviders: socialProviders.map((provider) => provider.id),
+          account: {
+            linking: account?.accountLinking?.enabled ?? true,
+            allowUnlinkingAll: account?.accountLinking?.allowUnlinkingAll ?? false,
+          },
           user: {
             changeEmail: user?.changeEmail?.enabled ?? false,
             deleteUser: user?.deleteUser?.enabled ?? false,
+            deleteUserVerification:
+              typeof user?.deleteUser?.sendDeleteAccountVerification === "function",
           },
         });
       }),

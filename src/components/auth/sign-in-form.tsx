@@ -7,6 +7,7 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
 import { safeRedirect } from "@/lib/redirect";
 
@@ -17,6 +18,8 @@ import { VerifyEmailNotice } from "./verify-email-notice";
 
 export function SignInForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
+  const { appName, emailSignIn, canSignIn, canSignUp, canResetPassword, emailVerification } =
+    useAuthConfig();
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const form = useForm({
@@ -29,7 +32,9 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
         toast.add({
           type: "info",
           title: "Verify your email",
-          description: "We sent you a new verification link.",
+          description: emailVerification.sendOnSignIn
+            ? "We sent you a new verification link."
+            : "Verify your email address to sign in.",
         });
         return;
       }
@@ -45,6 +50,19 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
     },
   });
 
+  if (!canSignIn) {
+    return (
+      <AuthCard
+        title="Sign in unavailable"
+        description={`${appName} has no sign-in method enabled.`}
+      >
+        <FieldDescription className="text-center">
+          Contact an administrator to get access.
+        </FieldDescription>
+      </AuthCard>
+    );
+  }
+
   return (
     <AuthCard title="Sign in" description="Welcome back. Sign in to continue.">
       {unverifiedEmail ? (
@@ -57,76 +75,84 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
           }}
         >
           <FieldGroup>
-            <SocialProviders action="Sign in" redirectTo={redirectTo} />
-            <form.Field name="email">
-              {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="email"
-                      autoComplete="email"
-                      placeholder="you@example.com"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                    />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            </form.Field>
+            <SocialProviders action="Sign in" redirectTo={redirectTo} showEmail={emailSignIn} />
+            {emailSignIn && (
+              <>
+                <form.Field name="email">
+                  {(field) => {
+                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          type="email"
+                          autoComplete="email"
+                          placeholder="you@example.com"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                        />
+                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      </Field>
+                    );
+                  }}
+                </form.Field>
 
-            <form.Field name="password">
-              {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <div className="flex items-center">
-                      <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                      <Link
-                        to="/auth/forgot-password"
-                        className="ml-auto text-sm underline-offset-4 hover:underline"
-                      >
-                        Forgot password?
+                <form.Field name="password">
+                  {(field) => {
+                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <div className="flex items-center">
+                          <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                          {canResetPassword && (
+                            <Link
+                              to="/auth/forgot-password"
+                              className="ml-auto text-sm underline-offset-4 hover:underline"
+                            >
+                              Forgot password?
+                            </Link>
+                          )}
+                        </div>
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          type="password"
+                          autoComplete="current-password"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                        />
+                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      </Field>
+                    );
+                  }}
+                </form.Field>
+
+                <Field>
+                  <form.Subscribe selector={(s) => s.isSubmitting}>
+                    {(isSubmitting) => (
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Spinner />}
+                        Sign in
+                      </Button>
+                    )}
+                  </form.Subscribe>
+                  {canSignUp && (
+                    <FieldDescription className="text-center">
+                      Don&apos;t have an account?{" "}
+                      <Link to="/auth/sign-up" search={{ redirect: redirectTo }}>
+                        Sign up
                       </Link>
-                    </div>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
-                      autoComplete="current-password"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                    />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            </form.Field>
-
-            <Field>
-              <form.Subscribe selector={(s) => s.isSubmitting}>
-                {(isSubmitting) => (
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting && <Spinner />}
-                    Sign in
-                  </Button>
-                )}
-              </form.Subscribe>
-              <FieldDescription className="text-center">
-                Don&apos;t have an account?{" "}
-                <Link to="/auth/sign-up" search={{ redirect: redirectTo }}>
-                  Sign up
-                </Link>
-              </FieldDescription>
-            </Field>
+                    </FieldDescription>
+                  )}
+                </Field>
+              </>
+            )}
           </FieldGroup>
         </form>
       )}

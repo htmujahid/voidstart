@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { useSuspenseQuery } from "@tanstack/react-query";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldSeparator } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
-import { authConfigQueryOptions } from "@/lib/queries/auth";
 import { safeRedirect } from "@/lib/redirect";
 
 import { socialIcons } from "./social-icons";
@@ -84,13 +83,13 @@ function getSocialProvider(id: string) {
 export function SocialProviders({
   action,
   redirectTo,
+  showEmail,
 }: {
   action: "Sign in" | "Sign up";
   redirectTo?: string;
+  showEmail: boolean;
 }) {
-  const {
-    data: { socialProviders: enabledProviders },
-  } = useSuspenseQuery(authConfigQueryOptions);
+  const { socialProviders: enabledProviders } = useAuthConfig();
   const [pending, setPending] = useState<string | null>(null);
 
   if (enabledProviders.length === 0) return null;
@@ -131,9 +130,11 @@ export function SocialProviders({
           );
         })}
       </Field>
-      <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
-        Or continue with
-      </FieldSeparator>
+      {showEmail && (
+        <FieldSeparator className="*:data-[slot=field-separator-content]:bg-card">
+          Or continue with
+        </FieldSeparator>
+      )}
     </>
   );
 }

@@ -5,9 +5,16 @@ import { authConfigPlugin } from "./src/lib/auth/auth-config-plugin.ts";
 
 export default defineAuth(({ defaults }) => ({
   ...defaults,
+  appName: "locosheet",
   emailAndPassword: {
     enabled: true,
+    disableSignUp: false,
     requireEmailVerification: true,
+    autoSignIn: true,
+    minPasswordLength: 8,
+    maxPasswordLength: 128,
+    resetPasswordTokenExpiresIn: 60 * 60,
+    revokeSessionsOnPasswordReset: false,
     sendResetPassword: async ({ user, url }) => {
       const result = await sendEmail({
         to: user.email,
@@ -17,11 +24,11 @@ export default defineAuth(({ defaults }) => ({
       if (!result.ok) console.error("Failed to send reset email", result);
     },
   },
-  plugins: [authConfigPlugin()],
   emailVerification: {
     sendOnSignUp: true,
     sendOnSignIn: true,
     autoSignInAfterVerification: true,
+    expiresIn: 60 * 60,
     sendVerificationEmail: async ({ user, url }) => {
       const result = await sendEmail({
         to: user.email,
@@ -31,4 +38,38 @@ export default defineAuth(({ defaults }) => ({
       if (!result.ok) console.error("Failed to send verification email", result);
     },
   },
+  user: {
+    changeEmail: {
+      enabled: false,
+      updateEmailWithoutVerification: false,
+    },
+    deleteUser: {
+      enabled: false,
+      deleteTokenExpiresIn: 60 * 60 * 24,
+    },
+  },
+  session: {
+    expiresIn: 60 * 60 * 24 * 7,
+    updateAge: 60 * 60 * 24,
+    freshAge: 60 * 60 * 24,
+    disableSessionRefresh: false,
+    cookieCache: {
+      enabled: false,
+      maxAge: 60 * 5,
+      strategy: "compact",
+    },
+  },
+  account: {
+    updateAccountOnSignIn: true,
+    encryptOAuthTokens: false,
+    accountLinking: {
+      enabled: true,
+      disableImplicitLinking: false,
+      requireLocalEmailVerified: true,
+      allowDifferentEmails: false,
+      allowUnlinkingAll: false,
+      updateUserInfoOnLink: false,
+    },
+  },
+  plugins: [authConfigPlugin()],
 }));

@@ -6,12 +6,15 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
 
 import { AuthCard } from "./auth-card";
+import { AuthNotice } from "./auth-notice";
 import { forgotPasswordSchema } from "./schemas";
 
 export function ForgotPasswordForm() {
+  const { canResetPassword } = useAuthConfig();
   const form = useForm({
     defaultValues: { email: "" },
     validators: { onSubmit: forgotPasswordSchema },
@@ -36,6 +39,15 @@ export function ForgotPasswordForm() {
       form.reset();
     },
   });
+
+  if (!canResetPassword) {
+    return (
+      <AuthNotice
+        title="Password reset unavailable"
+        description="Resetting passwords by email isn't enabled."
+      />
+    );
+  }
 
   return (
     <AuthCard

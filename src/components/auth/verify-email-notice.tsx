@@ -5,10 +5,12 @@ import { Button } from "@/components/ui/button";
 import { FieldDescription, FieldGroup } from "@/components/ui/field";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
 import { safeRedirect } from "@/lib/redirect";
 
 export function VerifyEmailNotice({ email, redirectTo }: { email: string; redirectTo?: string }) {
+  const { emailVerification } = useAuthConfig();
   const [status, setStatus] = useState<"idle" | "sending" | "sent">("idle");
 
   async function resend() {
@@ -37,7 +39,10 @@ export function VerifyEmailNotice({ email, redirectTo }: { email: string; redire
   return (
     <FieldGroup>
       <FieldDescription className="text-center">
-        We sent a verification link to <strong>{email}</strong>. Open it to activate your account.
+        We sent a verification link to <strong>{email}</strong>. Open it to activate your account.{" "}
+        {emailVerification.autoSignInAfterVerification
+          ? "You'll be signed in automatically."
+          : "Then come back and sign in."}
       </FieldDescription>
       <Button type="button" variant="outline" disabled={status === "sending"} onClick={resend}>
         {status === "sending" && <Spinner />}

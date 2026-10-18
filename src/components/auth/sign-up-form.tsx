@@ -1,22 +1,32 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useForm } from "@tanstack/react-form";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
 import { safeRedirect } from "@/lib/redirect";
 
 import { AuthCard } from "./auth-card";
-import { signUpSchema } from "./schemas";
+import { AuthNotice } from "./auth-notice";
+import { createSignUpSchema } from "./schemas";
 import { SocialProviders } from "./social-providers";
 import { VerifyEmailNotice } from "./verify-email-notice";
 
 export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
+  const router = useRouter();
   const [sentTo, setSentTo] = useState<string | null>(null);
+  const { appName, emailAndPassword, emailSignUp, canSignUp } = useAuthConfig();
+  const { minPasswordLength, maxPasswordLength, requireEmailVerification, autoSignIn } =
+    emailAndPassword;
+  const signUpSchema = useMemo(
+    () => createSignUpSchema({ minPasswordLength, maxPasswordLength }),
+    [minPasswordLength, maxPasswordLength],
+  );
 
   const form = useForm({
     defaultValues: { email: "", password: "", confirmPassword: "" },
@@ -37,14 +47,37 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
         });
         return;
       }
-      setSentTo(email);
+      if (requireEmailVerification) {
+        setSentTo(email);
+        toast.add({
+          type: "success",
+          title: "Account created",
+          description: "Check your email to verify your account.",
+        });
+        return;
+      }
+      if (autoSignIn) {
+        router.history.push(safeRedirect(redirectTo));
+        return;
+      }
       toast.add({
         type: "success",
         title: "Account created",
-        description: "Check your email to verify your account.",
+        description: "Sign in to continue.",
       });
+      await router.navigate({ to: "/auth/sign-in", search: { redirect: redirectTo } });
     },
   });
+
+  if (!canSignUp) {
+    return (
+      <AuthNotice
+        title="Sign up is disabled"
+        description={`New accounts can't be created on ${appName} right now.`}
+        redirectTo={redirectTo}
+      />
+    );
+  }
 
   return (
     <AuthCard title="Create an account" description="Enter your details to get started.">
@@ -58,91 +91,97 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
           }}
         >
           <FieldGroup>
-            <SocialProviders action="Sign up" redirectTo={redirectTo} />
-            <form.Field name="email">
-              {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="email"
-                      autoComplete="email"
-                      placeholder="you@example.com"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                    />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            </form.Field>
+            <SocialProviders action="Sign up" redirectTo={redirectTo} showEmail={emailSignUp} />
+            {emailSignUp && (
+              <>
+                <form.Field name="email">
+                  {(field) => {
+                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          type="email"
+                          autoComplete="email"
+                          placeholder="you@example.com"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                        />
+                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      </Field>
+                    );
+                  }}
+                </form.Field>
 
-            <form.Field name="password">
-              {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
-                      autoComplete="new-password"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                    />
-                    <FieldDescription>Must be at least 8 characters.</FieldDescription>
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            </form.Field>
+                <form.Field name="password">
+                  {(field) => {
+                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>Password</FieldLabel>
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          type="password"
+                          autoComplete="new-password"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                        />
+                        <FieldDescription>
+                          Must be at least {minPasswordLength} characters.
+                        </FieldDescription>
+                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      </Field>
+                    );
+                  }}
+                </form.Field>
 
-            <form.Field name="confirmPassword">
-              {(field) => {
-                const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                return (
-                  <Field data-invalid={isInvalid}>
-                    <FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
-                    <Input
-                      id={field.name}
-                      name={field.name}
-                      type="password"
-                      autoComplete="new-password"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      aria-invalid={isInvalid}
-                    />
-                    {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                  </Field>
-                );
-              }}
-            </form.Field>
+                <form.Field name="confirmPassword">
+                  {(field) => {
+                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+                    return (
+                      <Field data-invalid={isInvalid}>
+                        <FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          type="password"
+                          autoComplete="new-password"
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          aria-invalid={isInvalid}
+                        />
+                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                      </Field>
+                    );
+                  }}
+                </form.Field>
 
-            <Field>
-              <form.Subscribe selector={(s) => s.isSubmitting}>
-                {(isSubmitting) => (
-                  <Button type="submit" disabled={isSubmitting}>
-                    {isSubmitting && <Spinner />}
-                    Create account
-                  </Button>
-                )}
-              </form.Subscribe>
-              <FieldDescription className="text-center">
-                Already have an account?{" "}
-                <Link to="/auth/sign-in" search={{ redirect: redirectTo }}>
-                  Sign in
-                </Link>
-              </FieldDescription>
-            </Field>
+                <Field>
+                  <form.Subscribe selector={(s) => s.isSubmitting}>
+                    {(isSubmitting) => (
+                      <Button type="submit" disabled={isSubmitting}>
+                        {isSubmitting && <Spinner />}
+                        Create account
+                      </Button>
+                    )}
+                  </form.Subscribe>
+                  <FieldDescription className="text-center">
+                    Already have an account?{" "}
+                    <Link to="/auth/sign-in" search={{ redirect: redirectTo }}>
+                      Sign in
+                    </Link>
+                  </FieldDescription>
+                </Field>
+              </>
+            )}
           </FieldGroup>
         </form>
       )}

@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Link, useNavigate } from "@tanstack/react-router";
 
@@ -7,29 +7,37 @@ import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/c
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
 
 import { AuthCard } from "./auth-card";
-import { resetPasswordSchema } from "./schemas";
+import { AuthNotice } from "./auth-notice";
+import { createResetPasswordSchema } from "./schemas";
 
-export function ResetPasswordForm({ token }: { token?: string }) {
+export function ResetPasswordForm({ token, invalid }: { token?: string; invalid?: boolean }) {
   const navigate = useNavigate();
+  const { canResetPassword, emailAndPassword } = useAuthConfig();
+  const { minPasswordLength, maxPasswordLength } = emailAndPassword;
+  const resetPasswordSchema = useMemo(
+    () => createResetPasswordSchema({ minPasswordLength, maxPasswordLength }),
+    [minPasswordLength, maxPasswordLength],
+  );
 
   useEffect(() => {
-    if (token) return;
+    if (!canResetPassword || (token && !invalid)) return;
     toast.add({
       type: "error",
       title: "Invalid reset link",
       description: "This link is invalid or has expired. Request a new one.",
     });
     void navigate({ to: "/auth/forgot-password" });
-  }, [token, navigate]);
+  }, [token, invalid, canResetPassword, navigate]);
 
   const form = useForm({
     defaultValues: { password: "", confirmPassword: "" },
     validators: { onSubmit: resetPasswordSchema },
     onSubmit: async ({ value }) => {
-      if (!token) return;
+      if (!token || invalid) return;
       const { error } = await authClient.resetPassword({
         newPassword: value.password,
         token,
@@ -50,6 +58,15 @@ export function ResetPasswordForm({ token }: { token?: string }) {
       await navigate({ to: "/auth/sign-in" });
     },
   });
+
+  if (!canResetPassword) {
+    return (
+      <AuthNotice
+        title="Password reset unavailable"
+        description="Resetting passwords by email isn't enabled."
+      />
+    );
+  }
 
   return (
     <AuthCard title="Reset password" description="Choose a new password for your account.">
@@ -107,7 +124,7 @@ export function ResetPasswordForm({ token }: { token?: string }) {
           <Field>
             <form.Subscribe selector={(s) => s.isSubmitting}>
               {(isSubmitting) => (
-                <Button type="submit" disabled={isSubmitting || !token}>
+                <Button type="submit" disabled={isSubmitting || !token || invalid}>
                   {isSubmitting && <Spinner />}
                   Reset password
                 </Button>

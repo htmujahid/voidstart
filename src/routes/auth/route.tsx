@@ -12,6 +12,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthLayout() {
+  const { appName } = Route.useLoaderData();
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">
       <div className="flex w-full max-w-sm flex-col gap-6">
@@ -19,7 +20,7 @@ function AuthLayout() {
           <div className="flex size-6 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <Logo className="size-4" />
           </div>
-          locosheet
+          {appName}
         </Link>
         <Outlet />
       </div>

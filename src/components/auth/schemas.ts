@@ -2,35 +2,42 @@ import * as z from "zod";
 
 export const emailSchema = z.email("Enter a valid email address.");
 
-export const passwordSchema = z
-  .string()
-  .min(8, "Password must be at least 8 characters.")
-  .max(128, "Password must be at most 128 characters.");
+export interface PasswordRules {
+  minPasswordLength: number;
+  maxPasswordLength: number;
+}
+
+const createPasswordSchema = ({ minPasswordLength, maxPasswordLength }: PasswordRules) =>
+  z
+    .string()
+    .min(minPasswordLength, `Password must be at least ${minPasswordLength} characters.`)
+    .max(maxPasswordLength, `Password must be at most ${maxPasswordLength} characters.`);
+
+const confirmPassword = {
+  path: ["confirmPassword"],
+  message: "Passwords do not match.",
+};
 
 export const signInSchema = z.object({
   email: emailSchema,
   password: z.string().min(1, "Password is required."),
 });
 
-export const signUpSchema = z
-  .object({
-    email: emailSchema,
-    password: passwordSchema,
-    confirmPassword: z.string(),
-  })
-  .refine((v) => v.password === v.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match.",
-  });
+export const createSignUpSchema = (rules: PasswordRules) =>
+  z
+    .object({
+      email: emailSchema,
+      password: createPasswordSchema(rules),
+      confirmPassword: z.string(),
+    })
+    .refine((v) => v.password === v.confirmPassword, confirmPassword);
 
 export const forgotPasswordSchema = z.object({ email: emailSchema });
 
-export const resetPasswordSchema = z
-  .object({
-    password: passwordSchema,
-    confirmPassword: z.string(),
-  })
-  .refine((v) => v.password === v.confirmPassword, {
-    path: ["confirmPassword"],
-    message: "Passwords do not match.",
-  });
+export const createResetPasswordSchema = (rules: PasswordRules) =>
+  z
+    .object({
+      password: createPasswordSchema(rules),
+      confirmPassword: z.string(),
+    })
+    .refine((v) => v.password === v.confirmPassword, confirmPassword);

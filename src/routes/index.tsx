@@ -14,7 +14,7 @@ function Home() {
 
   return (
     <main>
-      <h1>Locosheet</h1>
+      <h1>locosheet</h1>
       <p>{message || "Loading..."}</p>
     </main>
   );

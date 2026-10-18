@@ -4,5 +4,13 @@ import { defineConfig } from 'void/config';
 export default defineConfig({
   "worker": {
     "compatibility_date": "2026-02-24"
-  }
+  },
+  auth: {
+    providers: ['email', 'google']
+  },
+  // sendEmail() is called from the root auth.ts, which Void's import scan doesn't
+  // cover, so enable email (and the local dev inbox) explicitly.
+  inference: { bindings: { email: true } },
+  // Default sender for sendEmail(). Replace the domain with one you own before deploying.
+  email: { from: 'locosheet <noreply@locosheet.app>' }
 });

@@ -4,12 +4,16 @@ import { sendEmail } from "void/email";
 
 import { authConfigPlugin } from "./src/lib/auth/auth-config-plugin.ts";
 
+const signUpEnabled = true;
+
+const greeting = (name: string) => (name ? `Hi ${name},` : "Hi,");
+
 export default defineAuth(({ defaults }) => ({
   ...defaults,
   appName: "locosheet",
   emailAndPassword: {
     enabled: true,
-    disableSignUp: false,
+    disableSignUp: !signUpEnabled,
     requireEmailVerification: true,
     autoSignIn: true,
     minPasswordLength: 8,
@@ -20,7 +24,7 @@ export default defineAuth(({ defaults }) => ({
       const result = await sendEmail({
         to: user.email,
         subject: "Reset your password",
-        text: `Hi ${user.name},\n\nReset your password using this link:\n${url}\n\nIf you didn't request this, you can ignore this email.`,
+        text: `${greeting(user.name)}\n\nReset your password using this link:\n${url}\n\nIf you didn't request this, you can ignore this email.`,
       });
       if (!result.ok) console.error("Failed to send reset email", result);
     },
@@ -34,7 +38,7 @@ export default defineAuth(({ defaults }) => ({
       const result = await sendEmail({
         to: user.email,
         subject: "Verify your email address",
-        text: `Hi ${user.name},\n\nConfirm your email address using this link:\n${url}\n\nIf you didn't create an account, you can ignore this email.`,
+        text: `${greeting(user.name)}\n\nConfirm your email address using this link:\n${url}\n\nIf you didn't create an account, you can ignore this email.`,
       });
       if (!result.ok) console.error("Failed to send verification email", result);
     },
@@ -51,7 +55,7 @@ export default defineAuth(({ defaults }) => ({
         const result = await sendEmail({
           to: user.email,
           subject: "Confirm account deletion",
-          text: `Hi ${user.name},\n\nConfirm that you want to permanently delete your account using this link:\n${url}\n\nIf you didn't request this, you can ignore this email.`,
+          text: `${greeting(user.name)}\n\nConfirm that you want to permanently delete your account using this link:\n${url}\n\nIf you didn't request this, you can ignore this email.`,
         });
         if (!result.ok) console.error("Failed to send delete account email", result);
       },
@@ -91,7 +95,7 @@ export default defineAuth(({ defaults }) => ({
     }),
     magicLink({
       expiresIn: 60 * 5,
-      disableSignUp: false,
+      disableSignUp: !signUpEnabled,
       sendMagicLink: async ({ email, url }) => {
         const result = await sendEmail({
           to: email,
@@ -105,7 +109,7 @@ export default defineAuth(({ defaults }) => ({
       otpLength: 6,
       expiresIn: 60 * 5,
       allowedAttempts: 3,
-      disableSignUp: false,
+      disableSignUp: !signUpEnabled,
       sendVerificationOTP: async ({ email, otp, type }) => {
         const purpose = {
           "sign-in": "sign in",

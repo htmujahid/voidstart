@@ -81,11 +81,9 @@ export function getSocialProvider(id: string) {
 }
 
 export function SocialProviders({
-  action,
   redirectTo,
   showEmail,
 }: {
-  action: "Sign in" | "Sign up";
   redirectTo?: string;
   showEmail: boolean;
 }) {
@@ -105,7 +103,7 @@ export function SocialProviders({
       setPending(null);
       toast.add({
         type: "error",
-        title: `${action} failed`,
+        title: "Authentication failed",
         description: error.message ?? "Unable to continue with that provider.",
       });
     }
@@ -125,7 +123,7 @@ export function SocialProviders({
               onClick={() => signIn(id)}
             >
               {pending === id ? <Spinner /> : <Icon />}
-              {action} with {name}
+              Continue with {name}
             </Button>
           );
         })}

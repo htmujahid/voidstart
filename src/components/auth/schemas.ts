@@ -37,13 +37,10 @@ export const signInSchema = z.object({
 });
 
 export const createSignUpSchema = (rules: PasswordRules) =>
-  z
-    .object({
-      email: emailSchema,
-      password: createPasswordSchema(rules),
-      confirmPassword: z.string(),
-    })
-    .refine((v) => v.password === v.confirmPassword, confirmPassword);
+  z.object({
+    email: emailSchema,
+    password: createPasswordSchema(rules),
+  });
 
 export const forgotPasswordSchema = z.object({ email: emailSchema });
 

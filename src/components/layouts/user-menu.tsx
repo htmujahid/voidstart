@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { useUser } from "@/hooks/use-user";
+import { userDisplayName, userInitials } from "@/lib/user";
 
 export function UserMenu() {
   const user = useUser();
@@ -26,14 +27,16 @@ export function UserMenu() {
         aria-label="Open user menu"
       >
         <Avatar>
-          <AvatarImage src={user.image ?? undefined} alt={user.name} />
-          <AvatarFallback>{user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+          <AvatarImage src={user.image ?? undefined} alt={userDisplayName(user)} />
+          <AvatarFallback>{userInitials(user)}</AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" sideOffset={8} className="min-w-56">
         <DropdownMenuGroup>
           <DropdownMenuLabel className="grid text-left font-normal">
-            <span className="truncate text-sm font-medium text-foreground">{user.name}</span>
+            <span className="truncate text-sm font-medium text-foreground">
+              {userDisplayName(user)}
+            </span>
             <span className="truncate text-xs">{user.email}</span>
           </DropdownMenuLabel>
         </DropdownMenuGroup>

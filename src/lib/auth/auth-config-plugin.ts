@@ -13,10 +13,14 @@ export const authConfigPlugin = () =>
           minUsernameLength?: number;
           maxUsernameLength?: number;
         }>("username");
-        const magicLinkOptions = pluginOptions<{ expiresIn?: number }>("magic-link");
-        const emailOtpOptions = pluginOptions<{ otpLength?: number; expiresIn?: number }>(
-          "email-otp",
+        const magicLinkOptions = pluginOptions<{ expiresIn?: number; disableSignUp?: boolean }>(
+          "magic-link",
         );
+        const emailOtpOptions = pluginOptions<{
+          otpLength?: number;
+          expiresIn?: number;
+          disableSignUp?: boolean;
+        }>("email-otp");
         const { emailAndPassword, emailVerification, user, account } = options;
 
         return ctx.json({
@@ -45,10 +49,12 @@ export const authConfigPlugin = () =>
           },
           magicLink: {
             enabled: !!magicLinkOptions,
+            signUp: !magicLinkOptions?.disableSignUp,
             expiresIn: magicLinkOptions?.expiresIn ?? 60 * 5,
           },
           emailOtp: {
             enabled: !!emailOtpOptions,
+            signUp: !emailOtpOptions?.disableSignUp,
             otpLength: emailOtpOptions?.otpLength ?? 6,
             expiresIn: emailOtpOptions?.expiresIn ?? 60 * 5,
           },

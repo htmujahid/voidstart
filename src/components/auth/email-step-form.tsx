@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useForm } from "@tanstack/react-form";
 
 import { Button } from "@/components/ui/button";
@@ -10,9 +11,11 @@ import { emailOnlySchema } from "./schemas";
 export function EmailStepForm({
   submitLabel,
   onSubmit,
+  children,
 }: {
   submitLabel: string;
   onSubmit: (email: string) => Promise<void>;
+  children?: ReactNode;
 }) {
   const form = useForm({
     defaultValues: { email: "" },
@@ -59,6 +62,7 @@ export function EmailStepForm({
               </Button>
             )}
           </form.Subscribe>
+          {children}
         </Field>
       </FieldGroup>
     </form>

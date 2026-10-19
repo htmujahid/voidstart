@@ -12,6 +12,7 @@ import { authClient } from "@/lib/auth/auth-client";
 import { safeRedirect, verifyEmailCallbackURL } from "@/lib/redirect";
 
 import { AuthCard } from "./auth-card";
+import { AuthMethodLinks } from "./auth-method-links";
 import { AuthNotice } from "./auth-notice";
 import { createSignUpSchema } from "./schemas";
 import { SocialProviders } from "./social-providers";
@@ -29,12 +30,12 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
   );
 
   const form = useForm({
-    defaultValues: { email: "", password: "", confirmPassword: "" },
+    defaultValues: { email: "", password: "" },
     validators: { onSubmit: signUpSchema },
     onSubmit: async ({ value }) => {
       const { email, password } = value;
       const { error } = await authClient.signUp.email({
-        name: email.split("@")[0],
+        name: "",
         email,
         password,
         callbackURL: verifyEmailCallbackURL(redirectTo),
@@ -84,16 +85,16 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
       {sentTo ? (
         <VerifyEmailNotice email={sentTo} redirectTo={redirectTo} />
       ) : (
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void form.handleSubmit();
-          }}
-        >
-          <FieldGroup>
-            <SocialProviders action="Sign up" redirectTo={redirectTo} showEmail={emailSignUp} />
-            {emailSignUp && (
-              <>
+        <FieldGroup>
+          <SocialProviders redirectTo={redirectTo} showEmail={emailSignUp} />
+          {emailSignUp && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void form.handleSubmit();
+              }}
+            >
+              <FieldGroup>
                 <form.Field name="email">
                   {(field) => {
                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
@@ -133,31 +134,6 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
                           onChange={(e) => field.handleChange(e.target.value)}
                           aria-invalid={isInvalid}
                         />
-                        <FieldDescription>
-                          Must be at least {minPasswordLength} characters.
-                        </FieldDescription>
-                        {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                      </Field>
-                    );
-                  }}
-                </form.Field>
-
-                <form.Field name="confirmPassword">
-                  {(field) => {
-                    const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>Confirm password</FieldLabel>
-                        <Input
-                          id={field.name}
-                          name={field.name}
-                          type="password"
-                          autoComplete="new-password"
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          aria-invalid={isInvalid}
-                        />
                         {isInvalid && <FieldError errors={field.state.meta.errors} />}
                       </Field>
                     );
@@ -173,17 +149,19 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
                       </Button>
                     )}
                   </form.Subscribe>
-                  <FieldDescription className="text-center">
-                    Already have an account?{" "}
-                    <Link to="/auth/sign-in" search={{ redirect: redirectTo }}>
-                      Sign in
-                    </Link>
-                  </FieldDescription>
+                  <AuthMethodLinks current="password" redirectTo={redirectTo} />
                 </Field>
-              </>
-            )}
-          </FieldGroup>
-        </form>
+              </FieldGroup>
+            </form>
+          )}
+          {!emailSignUp && <AuthMethodLinks current="password" redirectTo={redirectTo} />}
+          <FieldDescription className="text-center">
+            Already have an account?{" "}
+            <Link to="/auth/sign-in" search={{ redirect: redirectTo }}>
+              Sign in
+            </Link>
+          </FieldDescription>
+        </FieldGroup>
       )}
     </AuthCard>
   );

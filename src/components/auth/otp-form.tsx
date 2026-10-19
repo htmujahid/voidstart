@@ -12,10 +12,13 @@ import { authClient } from "@/lib/auth/auth-client";
 import { formatDuration } from "@/lib/duration";
 import { safeRedirect } from "@/lib/redirect";
 
+import { AuthCard } from "./auth-card";
+import { AuthMethodLinks } from "./auth-method-links";
+import { AuthNotice } from "./auth-notice";
 import { EmailStepForm } from "./email-step-form";
 
-export function OtpSignIn({ redirectTo }: { redirectTo?: string }) {
-  const { emailOtp } = useAuthConfig();
+export function OtpForm({ redirectTo }: { redirectTo?: string }) {
+  const { appName, emailOtp } = useAuthConfig();
   const [email, setEmail] = useState<string | null>(null);
 
   async function sendCode(address: string) {
@@ -34,26 +37,45 @@ export function OtpSignIn({ redirectTo }: { redirectTo?: string }) {
     return true;
   }
 
-  if (!email) {
+  if (!emailOtp.enabled) {
     return (
-      <EmailStepForm
-        submitLabel="Email me a code"
-        onSubmit={async (address) => {
-          if (await sendCode(address)) setEmail(address);
-        }}
+      <AuthNotice
+        title="Email code unavailable"
+        description={`${appName} doesn't support signing in with an email code.`}
+        redirectTo={redirectTo}
       />
     );
   }
 
   return (
-    <OtpCodeStep
-      email={email}
-      length={emailOtp.otpLength}
-      expiresIn={emailOtp.expiresIn}
-      redirectTo={redirectTo}
-      onResend={() => sendCode(email)}
-      onChangeEmail={() => setEmail(null)}
-    />
+    <AuthCard
+      title="Sign in with an email code"
+      description={
+        emailOtp.signUp
+          ? "We'll email you a code. New here? We'll create your account."
+          : "We'll email you a code to sign in."
+      }
+    >
+      {email ? (
+        <OtpCodeStep
+          email={email}
+          length={emailOtp.otpLength}
+          expiresIn={emailOtp.expiresIn}
+          redirectTo={redirectTo}
+          onResend={() => sendCode(email)}
+          onChangeEmail={() => setEmail(null)}
+        />
+      ) : (
+        <EmailStepForm
+          submitLabel="Email me a code"
+          onSubmit={async (address) => {
+            if (await sendCode(address)) setEmail(address);
+          }}
+        >
+          <AuthMethodLinks current="otp" redirectTo={redirectTo} />
+        </EmailStepForm>
+      )}
+    </AuthCard>
   );
 }
 

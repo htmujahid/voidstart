@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/item";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
+import { useSignOut } from "@/hooks/use-sign-out";
 import { authClient } from "@/lib/auth/auth-client";
 import { sessionsQueryOptions } from "@/lib/queries/auth";
 import { describeUserAgent } from "@/lib/user-agent";
@@ -23,27 +24,69 @@ import { SettingsCard } from "./settings-card";
 
 const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" });
 
+interface Device {
+  key: string;
+  userAgent?: string | null;
+  ipAddress?: string | null;
+  signedInAt: Date;
+  tokens: string[];
+  current: boolean;
+}
+
 export function SessionsList() {
   const queryClient = useQueryClient();
+  const signOut = useSignOut();
   const currentId = useRouteContext({ from: "__root__", select: (ctx) => ctx.session?.id });
   const { data: sessions } = useSuspenseQuery(sessionsQueryOptions);
   const [pending, setPending] = useState<string | null>(null);
 
-  const others = sessions.filter((s) => s.id !== currentId);
-
-  async function revoke(token: string) {
-    setPending(token);
-    const { error } = await authClient.revokeSession({ token });
-    setPending(null);
-    if (error) {
-      toast.add({
-        type: "error",
-        title: "Couldn't sign out device",
-        description: error.message ?? "Unable to revoke that session.",
+  const devices = Object.values(
+    sessions.reduce<Record<string, Device>>((acc, session) => {
+      const key = `${session.userAgent ?? ""}|${session.ipAddress ?? ""}`;
+      const createdAt = new Date(session.createdAt);
+      const device = (acc[key] ??= {
+        key,
+        userAgent: session.userAgent,
+        ipAddress: session.ipAddress,
+        signedInAt: createdAt,
+        tokens: [],
+        current: false,
       });
+      device.tokens.push(session.token);
+      device.current ||= session.id === currentId;
+      if (createdAt > device.signedInAt) device.signedInAt = createdAt;
+      return acc;
+    }, {}),
+  );
+  const hasOthers = sessions.some((s) => s.id !== currentId);
+
+  function fail(title: string, description: string) {
+    toast.add({ type: "error", title, description });
+  }
+
+  async function revokeDevice(device: Device) {
+    setPending(device.key);
+    const tokens = device.current
+      ? device.tokens.filter((token) => token !== currentToken())
+      : device.tokens;
+    const results = await Promise.all(tokens.map((token) => authClient.revokeSession({ token })));
+    const failed = results.find((r) => r.error);
+    if (failed?.error) {
+      setPending(null);
+      fail("Couldn't revoke session", failed.error.message ?? "Unable to revoke that session.");
       return;
     }
+    if (device.current) {
+      await signOut();
+      return;
+    }
+    setPending(null);
     await queryClient.invalidateQueries({ queryKey: sessionsQueryOptions.queryKey });
+    toast.add({ type: "success", title: "Session revoked" });
+  }
+
+  function currentToken() {
+    return sessions.find((s) => s.id === currentId)?.token;
   }
 
   async function revokeOthers() {
@@ -51,15 +94,11 @@ export function SessionsList() {
     const { error } = await authClient.revokeOtherSessions();
     setPending(null);
     if (error) {
-      toast.add({
-        type: "error",
-        title: "Couldn't sign out devices",
-        description: error.message ?? "Unable to revoke your other sessions.",
-      });
+      fail("Couldn't revoke sessions", error.message ?? "Unable to revoke your other sessions.");
       return;
     }
     await queryClient.invalidateQueries({ queryKey: sessionsQueryOptions.queryKey });
-    toast.add({ type: "success", title: "Signed out of other devices" });
+    toast.add({ type: "success", title: "Other sessions revoked" });
   }
 
   return (
@@ -67,7 +106,7 @@ export function SessionsList() {
       title="Active sessions"
       description="Devices where you're currently signed in."
       footer={
-        others.length > 0 && (
+        hasOthers && (
           <Button
             type="button"
             variant="outline"
@@ -75,40 +114,39 @@ export function SessionsList() {
             onClick={revokeOthers}
           >
             {pending === "others" && <Spinner />}
-            Sign out other devices
+            Revoke all other sessions
           </Button>
         )
       }
     >
       <div className="-my-2 divide-y">
-        {sessions.map((session) => (
-          <Item key={session.id} className="px-0">
+        {devices.map((device) => (
+          <Item key={device.key} className="px-0">
             <ItemMedia variant="icon">
               <LaptopIcon />
             </ItemMedia>
             <ItemContent>
               <ItemTitle>
-                {describeUserAgent(session.userAgent)}
-                {session.id === currentId && <Badge variant="secondary">This device</Badge>}
+                {describeUserAgent(device.userAgent)}
+                {device.current && <Badge variant="secondary">This device</Badge>}
               </ItemTitle>
               <ItemDescription>
-                {session.ipAddress ? `${session.ipAddress} · ` : ""}
-                Signed in {dateFormat.format(new Date(session.createdAt))}
+                {device.ipAddress ? `${device.ipAddress} · ` : ""}
+                Signed in {dateFormat.format(device.signedInAt)}
+                {device.tokens.length > 1 ? ` · ${device.tokens.length} sessions` : ""}
               </ItemDescription>
             </ItemContent>
-            {session.id !== currentId && (
-              <ItemActions>
-                <Button
-                  type="button"
-                  variant="outline"
-                  disabled={pending !== null}
-                  onClick={() => revoke(session.token)}
-                >
-                  {pending === session.token && <Spinner />}
-                  Sign out
-                </Button>
-              </ItemActions>
-            )}
+            <ItemActions>
+              <Button
+                type="button"
+                variant="outline"
+                disabled={pending !== null}
+                onClick={() => revokeDevice(device)}
+              >
+                {pending === device.key && <Spinner />}
+                {device.current ? "Sign out" : "Revoke"}
+              </Button>
+            </ItemActions>
           </Item>
         ))}
       </div>

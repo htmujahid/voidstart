@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
+import { isTwoFactorRedirect, twoFactorPath } from "@/lib/auth/two-factor";
 import { safeRedirect, verifyEmailCallbackURL } from "@/lib/redirect";
 
 import { AuthCard } from "./auth-card";
@@ -38,7 +39,7 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
       const { password } = value;
       const isEmail = !username.enabled || identifier.includes("@");
       const callbackURL = verifyEmailCallbackURL(redirectTo);
-      const { error } = isEmail
+      const { data, error } = isEmail
         ? await authClient.signIn.email({ email: identifier, password, callbackURL })
         : await authClient.signIn.username({ username: identifier, password, callbackURL });
       if (error?.code === "EMAIL_NOT_VERIFIED") {
@@ -57,6 +58,13 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
           type: "error",
           title: "Sign in failed",
           description: error.message ?? "Unable to sign in.",
+        });
+        return;
+      }
+      if (isTwoFactorRedirect(data)) {
+        await router.navigate({
+          to: twoFactorPath(data.twoFactorMethods),
+          search: { redirect: redirectTo },
         });
         return;
       }

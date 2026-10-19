@@ -1,6 +1,7 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 import { PasswordCard } from "@/components/account/password-card";
+import { TwoFactorCard } from "@/components/account/two-factor-card";
 import { accountsQueryOptions, authConfigQueryOptions } from "@/lib/queries/auth";
 
 export const Route = createFileRoute("/account/security")({
@@ -9,5 +10,14 @@ export const Route = createFileRoute("/account/security")({
     if (!config.emailAndPassword.enabled) throw redirect({ to: "/account/profile" });
   },
   loader: ({ context: { queryClient } }) => queryClient.query(accountsQueryOptions),
-  component: PasswordCard,
+  component: RouteComponent,
 });
+
+function RouteComponent() {
+  return (
+    <>
+      <PasswordCard />
+      <TwoFactorCard />
+    </>
+  );
+}

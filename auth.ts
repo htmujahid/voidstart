@@ -1,4 +1,4 @@
-import { emailOTP, magicLink, username } from "better-auth/plugins";
+import { emailOTP, magicLink, twoFactor, username } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { sendEmail } from "void/email";
 
@@ -123,6 +123,41 @@ export default defineAuth(({ defaults }) => ({
           text: `Use this code to ${purpose}:\n\n${otp}\n\nIt expires in 5 minutes. If you didn't request this, you can ignore this email.`,
         });
         if (!result.ok) console.error("Failed to send verification code email", result);
+      },
+    }),
+    twoFactor({
+      issuer: "locosheet",
+      allowPasswordless: false,
+      skipVerificationOnEnable: false,
+      twoFactorCookieMaxAge: 60 * 10,
+      trustDeviceMaxAge: 60 * 60 * 24 * 30,
+      totpOptions: {
+        digits: 6,
+        period: 30,
+      },
+      otpOptions: {
+        digits: 6,
+        period: 5,
+        allowedAttempts: 5,
+        storeOTP: "encrypted",
+        sendOTP: async ({ user, otp }) => {
+          const result = await sendEmail({
+            to: user.email,
+            subject: `Your sign-in code: ${otp}`,
+            text: `${greeting(user.name)}\n\nUse this code to finish signing in:\n\n${otp}\n\nIt expires in 5 minutes. If you didn't try to sign in, change your password.`,
+          });
+          if (!result.ok) console.error("Failed to send two-factor code email", result);
+        },
+      },
+      backupCodeOptions: {
+        amount: 10,
+        length: 10,
+        storeBackupCodes: "encrypted",
+      },
+      accountLockout: {
+        enabled: true,
+        maxFailedAttempts: 10,
+        durationSeconds: 60 * 15,
       },
     }),
     authConfigPlugin(),

@@ -13,6 +13,16 @@ export const authConfigPlugin = () =>
           minUsernameLength?: number;
           maxUsernameLength?: number;
         }>("username");
+        const twoFactorOptions = pluginOptions<{
+          issuer?: string;
+          allowPasswordless?: boolean;
+          skipVerificationOnEnable?: boolean;
+          twoFactorCookieMaxAge?: number;
+          trustDeviceMaxAge?: number;
+          totpOptions?: { digits?: 6 | 8; period?: number; disable?: boolean };
+          otpOptions?: { digits?: number; period?: number; sendOTP?: unknown };
+          backupCodeOptions?: { amount?: number; length?: number };
+        }>("two-factor");
         const magicLinkOptions = pluginOptions<{ expiresIn?: number; disableSignUp?: boolean }>(
           "magic-link",
         );
@@ -46,6 +56,27 @@ export const authConfigPlugin = () =>
           account: {
             linking: account?.accountLinking?.enabled ?? true,
             allowUnlinkingAll: account?.accountLinking?.allowUnlinkingAll ?? false,
+          },
+          twoFactor: {
+            enabled: !!twoFactorOptions,
+            allowPasswordless: twoFactorOptions?.allowPasswordless ?? false,
+            skipVerificationOnEnable: twoFactorOptions?.skipVerificationOnEnable ?? false,
+            verificationExpiresIn: twoFactorOptions?.twoFactorCookieMaxAge ?? 60 * 10,
+            trustDeviceMaxAge: twoFactorOptions?.trustDeviceMaxAge ?? 60 * 60 * 24 * 30,
+            totp: {
+              enabled: !!twoFactorOptions && !twoFactorOptions.totpOptions?.disable,
+              digits: twoFactorOptions?.totpOptions?.digits ?? 6,
+              period: twoFactorOptions?.totpOptions?.period ?? 30,
+            },
+            otp: {
+              enabled: typeof twoFactorOptions?.otpOptions?.sendOTP === "function",
+              digits: twoFactorOptions?.otpOptions?.digits ?? 6,
+              expiresIn: (twoFactorOptions?.otpOptions?.period ?? 3) * 60,
+            },
+            backupCodes: {
+              amount: twoFactorOptions?.backupCodeOptions?.amount ?? 10,
+              length: twoFactorOptions?.backupCodeOptions?.length ?? 10,
+            },
           },
           magicLink: {
             enabled: !!magicLinkOptions,

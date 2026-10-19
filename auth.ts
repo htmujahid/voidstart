@@ -1,3 +1,4 @@
+import { username } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { sendEmail } from "void/email";
 
@@ -83,5 +84,11 @@ export default defineAuth(({ defaults }) => ({
     throw: false,
     errorURL: "/auth/error",
   },
-  plugins: [authConfigPlugin()],
+  plugins: [
+    username({
+      minUsernameLength: 3,
+      maxUsernameLength: 30,
+    }),
+    authConfigPlugin(),
+  ],
 }));

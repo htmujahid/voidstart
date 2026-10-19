@@ -18,20 +18,48 @@ import { VerifyEmailNotice } from "./verify-email-notice";
 
 export function SignInForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
-  const { appName, emailSignIn, canSignIn, canSignUp, canResetPassword, emailVerification } =
-    useAuthConfig();
+  const {
+    appName,
+    emailSignIn,
+    canSignIn,
+    canSignUp,
+    canResetPassword,
+    emailVerification,
+    username,
+  } = useAuthConfig();
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const form = useForm({
-    defaultValues: { email: "", password: "" },
+    defaultValues: { identifier: "", password: "" },
     validators: { onSubmit: signInSchema },
     onSubmit: async ({ value }) => {
-      const { error } = await authClient.signIn.email({
-        ...value,
-        callbackURL: verifyEmailCallbackURL(redirectTo),
-      });
+      const identifier = value.identifier.trim();
+      const { password } = value;
+      const { error } =
+        username.enabled && !identifier.includes("@")
+          ? await authClient.signIn.username({
+              username: identifier,
+              password,
+              callbackURL: verifyEmailCallbackURL(redirectTo),
+            })
+          : await authClient.signIn.email({
+              email: identifier,
+              password,
+              callbackURL: verifyEmailCallbackURL(redirectTo),
+            });
       if (error?.code === "EMAIL_NOT_VERIFIED") {
-        setUnverifiedEmail(value.email);
+        // The email is unknown when signing in by username, so verification can't be resent.
+        if (!identifier.includes("@")) {
+          toast.add({
+            type: "info",
+            title: "Verify your email",
+            description: emailVerification.sendOnSignIn
+              ? "We sent you a new verification link."
+              : "Verify your email address to sign in.",
+          });
+          return;
+        }
+        setUnverifiedEmail(identifier);
         toast.add({
           type: "info",
           title: "Verify your email",
@@ -81,18 +109,22 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
             <SocialProviders action="Sign in" redirectTo={redirectTo} showEmail={emailSignIn} />
             {emailSignIn && (
               <>
-                <form.Field name="email">
+                <form.Field name="identifier">
                   {(field) => {
                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                     return (
                       <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+                        <FieldLabel htmlFor={field.name}>
+                          {username.enabled ? "Email or username" : "Email"}
+                        </FieldLabel>
                         <Input
                           id={field.name}
                           name={field.name}
-                          type="email"
-                          autoComplete="email"
-                          placeholder="you@example.com"
+                          type={username.enabled ? "text" : "email"}
+                          autoComplete={username.enabled ? "username" : "email"}
+                          placeholder={
+                            username.enabled ? "you@example.com or username" : "you@example.com"
+                          }
                           value={field.state.value}
                           onBlur={field.handleBlur}
                           onChange={(e) => field.handleChange(e.target.value)}

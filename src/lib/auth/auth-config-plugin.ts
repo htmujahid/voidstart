@@ -7,6 +7,9 @@ export const authConfigPlugin = () =>
     endpoints: {
       getConfig: createAuthEndpoint("/config", { method: "GET" }, async (ctx) => {
         const { options, appName, password, socialProviders } = ctx.context;
+        const usernameOptions = options.plugins?.find((p) => p.id === "username")?.options as
+          | { minUsernameLength?: number; maxUsernameLength?: number }
+          | undefined;
         const { emailAndPassword, emailVerification, user, account } = options;
 
         return ctx.json({
@@ -32,6 +35,11 @@ export const authConfigPlugin = () =>
           account: {
             linking: account?.accountLinking?.enabled ?? true,
             allowUnlinkingAll: account?.accountLinking?.allowUnlinkingAll ?? false,
+          },
+          username: {
+            enabled: !!usernameOptions,
+            minUsernameLength: usernameOptions?.minUsernameLength ?? 3,
+            maxUsernameLength: usernameOptions?.maxUsernameLength ?? 30,
           },
           user: {
             changeEmail: user?.changeEmail?.enabled ?? false,

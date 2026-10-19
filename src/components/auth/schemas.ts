@@ -18,14 +18,28 @@ const confirmPassword = {
   message: "Passwords do not match.",
 };
 
+export interface UsernameRules {
+  minUsernameLength: number;
+  maxUsernameLength: number;
+}
+
+export const createUsernameSchema = ({ minUsernameLength, maxUsernameLength }: UsernameRules) =>
+  z
+    .string()
+    .trim()
+    .min(minUsernameLength, `Username must be at least ${minUsernameLength} characters.`)
+    .max(maxUsernameLength, `Username must be at most ${maxUsernameLength} characters.`)
+    .regex(/^[a-zA-Z0-9_.]+$/, "Use only letters, numbers, underscores and dots.");
+
 export const signInSchema = z.object({
-  email: emailSchema,
+  identifier: z.string().trim().min(1, "Email or username is required."),
   password: z.string().min(1, "Password is required."),
 });
 
-export const createSignUpSchema = (rules: PasswordRules) =>
+export const createSignUpSchema = (rules: PasswordRules, usernameRules?: UsernameRules) =>
   z
     .object({
+      username: usernameRules ? createUsernameSchema(usernameRules) : z.string(),
       email: emailSchema,
       password: createPasswordSchema(rules),
       confirmPassword: z.string(),

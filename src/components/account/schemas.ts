@@ -1,11 +1,14 @@
 import * as z from "zod";
 
-import { createPasswordSchema, emailSchema } from "@/components/auth/schemas";
-import type { PasswordRules } from "@/components/auth/schemas";
+import { createPasswordSchema, createUsernameSchema, emailSchema } from "@/components/auth/schemas";
+import type { PasswordRules, UsernameRules } from "@/components/auth/schemas";
 
 export const profileSchema = z.object({
   name: z.string().trim().min(1, "Name is required.").max(100, "Name is too long."),
 });
+
+export const createUsernameFormSchema = (rules: UsernameRules) =>
+  z.object({ username: createUsernameSchema(rules) });
 
 export const changeEmailSchema = z.object({ newEmail: emailSchema });
 

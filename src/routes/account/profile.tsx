@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { DangerZone } from "@/components/account/danger-zone";
 import { EmailCard } from "@/components/account/email-card";
 import { ProfileForm } from "@/components/account/profile-form";
+import { UsernameCard } from "@/components/account/username-card";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { accountsQueryOptions } from "@/lib/queries/auth";
 
@@ -12,11 +13,12 @@ export const Route = createFileRoute("/account/profile")({
 });
 
 function RouteComponent() {
-  const { user } = useAuthConfig();
+  const { user, username } = useAuthConfig();
 
   return (
     <>
       <ProfileForm />
+      {username.enabled && <UsernameCard />}
       <EmailCard />
       {user.deleteUser && <DangerZone />}
     </>

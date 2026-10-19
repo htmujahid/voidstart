@@ -16,7 +16,8 @@ import {
   type AdminUser,
 } from "@/lib/queries/admin";
 
-import { UserRowActionDialogs, type UserRowAction } from "./user-actions";
+import { UserRowActionDialogs } from "./user-row-action-dialogs";
+import type { UserRowAction } from "./user-row-actions";
 import { UsersActionBar } from "./users-action-bar";
 import { createUsersColumns } from "./users-columns";
 
@@ -26,7 +27,6 @@ export function UsersTable() {
   const currentUserId = useUser()?.id ?? "";
   const [rowAction, setRowAction] = useState<UserRowAction | null>(null);
 
-  // `useDataTable` owns the URL state; reading the same keys here gives the request its inputs.
   const [search] = useQueryStates(usersSearchParams);
   const query = getDataTableQuery(search, usersColumnConfigs);
   const { data, isPending, error } = useQuery(usersQueryOptions(query));
@@ -70,9 +70,10 @@ export function UsersTable() {
     <>
       <DataTable
         table={table}
+        className="overflow-visible gap-3 [&_[data-slot=data-table-pagination]]:overflow-visible [&_[data-slot=data-table-pagination]]:px-0"
         actionBar={<UsersActionBar table={table} currentUserId={currentUserId} />}
       >
-        <DataTableToolbar table={table} />
+        <DataTableToolbar table={table} className="p-0" />
       </DataTable>
       <UserRowActionDialogs action={rowAction} onClose={() => setRowAction(null)} />
     </>

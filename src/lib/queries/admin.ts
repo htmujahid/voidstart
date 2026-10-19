@@ -8,12 +8,6 @@ import type {
   DataTableColumnConfigsQuery,
 } from "@/lib/data-table-types";
 
-/**
- * Shared by the URL parsers, the columns and the query below, so they can't drift.
- *
- * `admin.listUsers` takes one search, one filter and one sort, so only `email` (search)
- * and `role` (filter) are filterable. Everything else is sortable or display-only.
- */
 export const usersColumnConfigs = {
   name: {},
   email: { variant: "text" },
@@ -71,3 +65,24 @@ export const usersQueryOptions = (query: UsersQuery) =>
     queryFn: () => fetchUsers(query),
     placeholderData: keepPreviousData,
   });
+
+const countUsers = async (query: { filterField?: string; filterValue?: boolean | string } = {}) => {
+  const { data, error } = await authClient.admin.listUsers({
+    query: { limit: 1, ...query, ...(query.filterField ? { filterOperator: "eq" } : {}) },
+  });
+  if (error) throw new Error(error.message ?? `Request failed (${error.status})`);
+  return data.total;
+};
+
+async function fetchUserStats() {
+  const [total, admins, banned, unverified] = await Promise.all([
+    countUsers(),
+    countUsers({ filterField: "role", filterValue: "admin" }),
+    countUsers({ filterField: "banned", filterValue: true }),
+    countUsers({ filterField: "emailVerified", filterValue: false }),
+  ]);
+  return { total, admins, banned, unverified };
+}
+
+export const userStatsQueryOptions = () =>
+  queryOptions({ queryKey: [...usersKey, "stats"], queryFn: fetchUserStats });

@@ -19,7 +19,7 @@ import { formatDate } from "@/lib/format";
 import { usersColumnConfigs, type AdminUser } from "@/lib/queries/admin";
 import { isAdmin, userDisplayName, userInitials } from "@/lib/user";
 
-import { UserRowActions, type UserRowAction } from "./user-actions";
+import { UserRowActions, type UserRowAction } from "./user-row-actions";
 
 interface CreateUsersColumnsOptions {
   currentUserId: string;

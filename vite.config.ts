@@ -15,7 +15,6 @@ const generated = [
 ];
 const vendored = [
   "src/components/ui/**",
-  // Dice UI data table (installed with the shadcn CLI)
   "src/components/data-table/**",
   "src/hooks/use-data-table.ts",
   "src/hooks/use-debounced-callback.ts",

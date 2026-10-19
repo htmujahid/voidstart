@@ -4,7 +4,6 @@ import { useNavigate, useRouteContext } from "@tanstack/react-router";
 import { toast } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth/auth-client";
 
-/** Whether the current session is an admin impersonating this user, and how to stop. */
 export function useImpersonation() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -24,7 +23,7 @@ export function useImpersonation() {
       return;
     }
     queryClient.clear();
-    await navigate({ to: "/admin/users" });
+    await navigate({ to: "/admin" });
   }
 
   return { impersonating, stop };

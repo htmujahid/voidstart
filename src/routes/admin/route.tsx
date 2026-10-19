@@ -4,7 +4,6 @@ import { SiteHeader } from "@/components/layouts/site-header";
 import { isAdmin } from "@/lib/user";
 
 export const Route = createFileRoute("/admin")({
-  // The admin API enforces this server-side too; this keeps non-admins off the pages.
   beforeLoad: ({ context }) => {
     if (!isAdmin(context.user)) throw redirect({ to: "/" });
   },

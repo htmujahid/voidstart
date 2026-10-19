@@ -1,6 +1,6 @@
 import { Suspense, lazy } from "react";
 import type { QueryClient } from "@tanstack/react-query";
-import { Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
+import { HeadContent, Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
 
 import { Toaster } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth/auth-client";
@@ -26,12 +26,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     return { user, session: data?.session ?? null };
   },
   loader: ({ context: { queryClient } }) => queryClient.query(authConfigQueryOptions),
+  head: ({ loaderData }) => ({
+    meta: [{ title: loaderData?.appName }],
+  }),
   component: RootComponent,
 });
 
 function RootComponent() {
   return (
     <Toaster>
+      <HeadContent />
       <Outlet />
       <Suspense>
         <Devtools />

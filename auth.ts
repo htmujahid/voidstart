@@ -23,10 +23,6 @@ export default defineAuth(({ defaults, env }) => {
   return {
     ...defaults,
     appName,
-    trustedOrigins: ((env.TRUSTED_ORIGINS as string | undefined) ?? "")
-      .split(",")
-      .map((origin) => origin.trim())
-      .filter(Boolean),
     emailAndPassword: {
       enabled: true,
       disableSignUp: !signUpEnabled,

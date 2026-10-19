@@ -11,12 +11,13 @@ import {
   ActionBarSeparator,
 } from "@/components/ui/action-bar";
 import { Spinner } from "@/components/ui/spinner";
+import { useAdminAction } from "@/hooks/use-admin-action";
+import { useUser } from "@/hooks/use-user";
 import { authClient } from "@/lib/auth/auth-client";
 import type { DataTableFeatures } from "@/lib/data-table-features";
 import { getVisibleSelectedRows } from "@/lib/data-table-utils";
 import type { AdminUser } from "@/lib/queries/admin";
-
-import { useAdminAction } from "./use-admin-action";
+import { userCan } from "@/lib/user";
 
 type UsersTable = ReactTable<DataTableFeatures, AdminUser, unknown>;
 
@@ -35,6 +36,7 @@ export function UsersActionBar(props: UsersActionBarProps) {
 
 function UsersActionBarContent({ table, currentUserId }: UsersActionBarProps) {
   const run = useAdminAction();
+  const canRevoke = userCan(useUser(), { session: ["revoke"] });
   const [pending, setPending] = useState(false);
 
   const selected = getVisibleSelectedRows(table);
@@ -73,7 +75,7 @@ function UsersActionBarContent({ table, currentUserId }: UsersActionBarProps) {
         <ActionBarItem
           variant="secondary"
           size="sm"
-          disabled={ids.length === 0 || pending}
+          disabled={ids.length === 0 || pending || !canRevoke}
           onSelect={(event) => {
             event.preventDefault();
             void revokeSessions();

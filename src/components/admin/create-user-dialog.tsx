@@ -24,20 +24,16 @@ import {
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
+import { useAdminAction } from "@/hooks/use-admin-action";
 import { authClient } from "@/lib/auth/auth-client";
-
-import { useAdminAction } from "./use-admin-action";
-
-const ROLES = [
-  { value: "user", label: "User" },
-  { value: "admin", label: "Admin" },
-];
+import { DEFAULT_ROLE, type RoleName } from "@/lib/auth/permissions";
+import { ROLE_OPTIONS } from "@/lib/auth/roles";
 
 const defaultValues = {
   name: "",
   email: "",
   password: "",
-  role: "user",
+  role: DEFAULT_ROLE as string,
   emailVerified: true,
 };
 
@@ -54,7 +50,7 @@ export function CreateUserDialog() {
             name: value.name.trim(),
             email: value.email.trim(),
             password: value.password,
-            role: value.role as "user" | "admin",
+            role: value.role as RoleName,
             data: { emailVerified: value.emailVerified },
           }),
         "User created",
@@ -135,8 +131,9 @@ export function CreateUserDialog() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {ROLES.map((role) => (
+                      {ROLE_OPTIONS.map((role) => (
                         <SelectItem key={role.value} value={role.value}>
+                          <role.icon />
                           {role.label}
                         </SelectItem>
                       ))}

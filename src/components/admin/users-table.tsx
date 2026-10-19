@@ -15,6 +15,7 @@ import {
   usersSearchParams,
   type AdminUser,
 } from "@/lib/queries/admin";
+import { userCan } from "@/lib/user";
 
 import { CreateUserDialog } from "./create-user-dialog";
 import { UserRowActionDialogs } from "./user-row-action-dialogs";
@@ -25,7 +26,9 @@ import { createUsersColumns } from "./users-columns";
 const NO_USERS: AdminUser[] = [];
 
 export function UsersTable() {
-  const currentUserId = useUser()?.id ?? "";
+  const currentUser = useUser();
+  const currentUserId = currentUser?.id ?? "";
+  const canCreate = userCan(currentUser, { user: ["create"] });
   const [rowAction, setRowAction] = useState<UserRowAction | null>(null);
 
   const [search] = useQueryStates(usersSearchParams);
@@ -75,7 +78,7 @@ export function UsersTable() {
         actionBar={<UsersActionBar table={table} currentUserId={currentUserId} />}
       >
         <DataTableToolbar table={table} className="p-0">
-          <CreateUserDialog />
+          {canCreate && <CreateUserDialog />}
         </DataTableToolbar>
       </DataTable>
       <UserRowActionDialogs action={rowAction} onClose={() => setRowAction(null)} />

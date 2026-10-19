@@ -20,11 +20,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Spinner } from "@/components/ui/spinner";
+import { useAdminAction } from "@/hooks/use-admin-action";
 import { authClient } from "@/lib/auth/auth-client";
 import type { AdminUser } from "@/lib/queries/admin";
 import { userDisplayName } from "@/lib/user";
-
-import { useAdminAction } from "./use-admin-action";
 
 const DAY = 60 * 60 * 24;
 const BAN_DURATIONS = [

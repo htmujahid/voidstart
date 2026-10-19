@@ -14,7 +14,7 @@ import {
 import { useImpersonation } from "@/hooks/use-impersonation";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { useUser } from "@/hooks/use-user";
-import { isAdmin, userDisplayName, userInitials } from "@/lib/user";
+import { ADMIN_ACCESS, userCan, userDisplayName, userInitials } from "@/lib/user";
 
 export function UserMenu() {
   const user = useUser();
@@ -48,7 +48,7 @@ export function UserMenu() {
             <UserIcon />
             Account
           </DropdownMenuItem>
-          {isAdmin(user) && (
+          {userCan(user, ADMIN_ACCESS) && (
             <DropdownMenuItem render={<Link to="/admin" />}>
               <ShieldCheckIcon />
               Admin

@@ -10,6 +10,7 @@ import {
 import { createAuthClient } from "better-auth/react";
 
 import { authConfigClient } from "./auth-config-client";
+import { ac, adminRole, userRole } from "./permissions";
 
 export const authClient = createAuthClient({
   plugins: [
@@ -19,7 +20,7 @@ export const authClient = createAuthClient({
     twoFactorClient(),
     passkeyClient(),
     lastLoginMethodClient({ cookieName: "last_login_method" }),
-    adminClient(),
+    adminClient({ ac, roles: { admin: adminRole, user: userRole } }),
     authConfigClient(),
   ],
 });

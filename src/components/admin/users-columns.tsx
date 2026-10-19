@@ -1,23 +1,18 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import {
-  CalendarIcon,
-  ShieldCheckIcon,
-  ShieldIcon,
-  Text,
-  UserIcon,
-  UserRoundIcon,
-} from "lucide-react";
+import { CalendarIcon, ShieldIcon, Text, UserRoundIcon } from "lucide-react";
 
 import { getDataTableActionsColumn } from "@/components/data-table/data-table-actions-column";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
 import { getDataTableSelectColumn } from "@/components/data-table/data-table-select-column";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { getRoleLabel, hasAdminRole } from "@/lib/auth/permissions";
+import { ROLE_OPTIONS } from "@/lib/auth/roles";
 import type { DataTableFeatures } from "@/lib/data-table-features";
 import { getColumnOptions } from "@/lib/data-table-parsers";
 import { formatDate } from "@/lib/format";
 import { usersColumnConfigs, type AdminUser } from "@/lib/queries/admin";
-import { isAdmin, userDisplayName, userInitials } from "@/lib/user";
+import { userDisplayName, userInitials } from "@/lib/user";
 
 import { UserRowActions, type UserRowAction } from "./user-row-actions";
 
@@ -72,16 +67,16 @@ export function createUsersColumns({
       accessorFn: (user) => user.role || "user",
       header: ({ column }) => <DataTableColumnHeader column={column} label="Role" />,
       cell: ({ row }) => {
-        const role = row.original.role || "user";
-        return <Badge variant={isAdmin(row.original) ? "default" : "secondary"}>{role}</Badge>;
+        return (
+          <Badge variant={hasAdminRole(row.original.role) ? "default" : "secondary"}>
+            {getRoleLabel(row.original.role)}
+          </Badge>
+        );
       },
       meta: {
         label: "Role",
         variant: "select",
-        options: [
-          { label: "Admin", value: "admin", icon: ShieldCheckIcon },
-          { label: "User", value: "user", icon: UserIcon },
-        ],
+        options: ROLE_OPTIONS,
         icon: ShieldIcon,
       },
       size: 120,

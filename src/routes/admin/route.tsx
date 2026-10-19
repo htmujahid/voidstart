@@ -1,11 +1,11 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
 
 import { SiteHeader } from "@/components/layouts/site-header";
-import { isAdmin } from "@/lib/user";
+import { ADMIN_ACCESS, userCan } from "@/lib/user";
 
 export const Route = createFileRoute("/admin")({
   beforeLoad: ({ context }) => {
-    if (!isAdmin(context.user)) throw redirect({ to: "/" });
+    if (!userCan(context.user, ADMIN_ACCESS)) throw redirect({ to: "/" });
   },
   component: AdminLayout,
 });

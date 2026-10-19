@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { AccessCard } from "@/components/account/access-card";
 import { DangerZone } from "@/components/account/danger-zone";
 import { EmailCard } from "@/components/account/email-card";
 import { ProfileForm } from "@/components/account/profile-form";
@@ -18,6 +19,7 @@ function RouteComponent() {
   return (
     <>
       <ProfileForm />
+      <AccessCard />
       {username.enabled && <UsernameCard />}
       <EmailCard />
       {user.deleteUser && <DangerZone />}

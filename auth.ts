@@ -13,6 +13,7 @@ import { sendEmail } from "void/email";
 
 import { DEFAULT_APP_NAME } from "./src/lib/app.ts";
 import { authConfigPlugin } from "./src/lib/auth/auth-config-plugin.ts";
+import { ac, ADMIN_ROLES, adminRole, DEFAULT_ROLE, userRole } from "./src/lib/auth/permissions.ts";
 
 const signUpEnabled = true;
 
@@ -103,7 +104,16 @@ export default defineAuth(({ defaults, env }) => {
     },
     plugins: [
       bearer(),
-      admin(),
+      admin({
+        ac,
+        roles: { admin: adminRole, user: userRole },
+        defaultRole: DEFAULT_ROLE,
+        adminRoles: ADMIN_ROLES,
+        impersonationSessionDuration: 60 * 60,
+        defaultBanReason: "Violation of the terms of service",
+        bannedUserMessage:
+          "Your account has been suspended. Contact support if you think this is a mistake.",
+      }),
       username({
         minUsernameLength: 3,
         maxUsernameLength: 30,

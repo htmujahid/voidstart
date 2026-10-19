@@ -3,8 +3,7 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   BanIcon,
   LogOutIcon,
-  ShieldCheckIcon,
-  ShieldOffIcon,
+  ShieldIcon,
   Trash2Icon,
   UserCheckIcon,
   UserRoundCogIcon,
@@ -14,14 +13,26 @@ import {
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "@/components/ui/toast";
+import { useAdminAction } from "@/hooks/use-admin-action";
+import { useUser } from "@/hooks/use-user";
 import { authClient } from "@/lib/auth/auth-client";
+import {
+  DEFAULT_ROLE,
+  hasAdminRole,
+  type Permissions,
+  type RoleName,
+} from "@/lib/auth/permissions";
+import { ROLE_OPTIONS } from "@/lib/auth/roles";
 import type { AdminUser } from "@/lib/queries/admin";
-import { isAdmin, userDisplayName } from "@/lib/user";
-
-import { useAdminAction } from "./use-admin-action";
+import { userCan, userDisplayName } from "@/lib/user";
 
 export interface UserRowAction {
   user: AdminUser;
@@ -40,7 +51,17 @@ export function UserRowActions({
   const run = useAdminAction();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const userIsAdmin = isAdmin(user);
+  const me = useUser();
+  const allowed = (permissions: Permissions) => userCan(me, permissions);
+
+  const canImpersonate =
+    !isSelf &&
+    allowed({ user: ["impersonate"] }) &&
+    (!hasAdminRole(user.role) || allowed({ user: ["impersonate-admins"] }));
+  const canSetRole = allowed({ user: ["set-role"] });
+  const canRevoke = allowed({ session: ["revoke"] });
+  const canBan = allowed({ user: ["ban"] });
+  const canDelete = allowed({ user: ["delete"] });
 
   async function impersonate() {
     const { error } = await authClient.admin.impersonateUser({ userId: user.id });
@@ -56,76 +77,108 @@ export function UserRowActions({
     await navigate({ to: "/" });
   }
 
+  const manageGroup = canImpersonate || canSetRole || canRevoke;
+  const dangerGroup = canBan || canDelete;
+
   return (
     <>
       <DropdownMenuGroup>
         <DropdownMenuLabel className="truncate">{userDisplayName(user)}</DropdownMenuLabel>
       </DropdownMenuGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuGroup>
-        {!isSelf && (
-          <DropdownMenuItem onClick={() => void impersonate()}>
-            <UserRoundCogIcon />
-            Impersonate
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuItem
-          disabled={isSelf}
-          onClick={() =>
-            void run(
-              () =>
-                authClient.admin.setRole({ userId: user.id, role: userIsAdmin ? "user" : "admin" }),
-              userIsAdmin ? "Admin role removed" : "Made admin",
-              "Couldn't change role",
-            )
-          }
-        >
-          {userIsAdmin ? <ShieldOffIcon /> : <ShieldCheckIcon />}
-          {userIsAdmin ? "Remove admin" : "Make admin"}
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() =>
-            void run(
-              () => authClient.admin.revokeUserSessions({ userId: user.id }),
-              "Sessions revoked",
-              "Couldn't revoke sessions",
-            )
-          }
-        >
-          <LogOutIcon />
-          Revoke sessions
-        </DropdownMenuItem>
-      </DropdownMenuGroup>
-      <DropdownMenuSeparator />
-      <DropdownMenuGroup>
-        {user.banned ? (
-          <DropdownMenuItem
-            onClick={() =>
-              void run(
-                () => authClient.admin.unbanUser({ userId: user.id }),
-                "User unbanned",
-                "Couldn't unban user",
-              )
-            }
-          >
-            <UserCheckIcon />
-            Unban
-          </DropdownMenuItem>
-        ) : (
-          <DropdownMenuItem disabled={isSelf} onClick={() => onRowAction({ user, type: "ban" })}>
-            <BanIcon />
-            Ban…
-          </DropdownMenuItem>
-        )}
-        <DropdownMenuItem
-          variant="destructive"
-          disabled={isSelf}
-          onClick={() => onRowAction({ user, type: "delete" })}
-        >
-          <Trash2Icon />
-          Delete…
-        </DropdownMenuItem>
-      </DropdownMenuGroup>
+      {manageGroup && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {canImpersonate && (
+              <DropdownMenuItem onClick={() => void impersonate()}>
+                <UserRoundCogIcon />
+                Impersonate
+              </DropdownMenuItem>
+            )}
+            {canSetRole && (
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger disabled={isSelf}>
+                  <ShieldIcon />
+                  Change role
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent>
+                  <DropdownMenuRadioGroup
+                    value={user.role || DEFAULT_ROLE}
+                    onValueChange={(role) =>
+                      void run(
+                        () => authClient.admin.setRole({ userId: user.id, role: role as RoleName }),
+                        "Role updated",
+                        "Couldn't change role",
+                      )
+                    }
+                  >
+                    {ROLE_OPTIONS.map((option) => (
+                      <DropdownMenuRadioItem key={option.value} value={option.value}>
+                        <option.icon />
+                        {option.label}
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+            )}
+            {canRevoke && (
+              <DropdownMenuItem
+                onClick={() =>
+                  void run(
+                    () => authClient.admin.revokeUserSessions({ userId: user.id }),
+                    "Sessions revoked",
+                    "Couldn't revoke sessions",
+                  )
+                }
+              >
+                <LogOutIcon />
+                Revoke sessions
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
+        </>
+      )}
+      {dangerGroup && (
+        <>
+          <DropdownMenuSeparator />
+          <DropdownMenuGroup>
+            {canBan &&
+              (user.banned ? (
+                <DropdownMenuItem
+                  onClick={() =>
+                    void run(
+                      () => authClient.admin.unbanUser({ userId: user.id }),
+                      "User unbanned",
+                      "Couldn't unban user",
+                    )
+                  }
+                >
+                  <UserCheckIcon />
+                  Unban
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem
+                  disabled={isSelf}
+                  onClick={() => onRowAction({ user, type: "ban" })}
+                >
+                  <BanIcon />
+                  Ban…
+                </DropdownMenuItem>
+              ))}
+            {canDelete && (
+              <DropdownMenuItem
+                variant="destructive"
+                disabled={isSelf}
+                onClick={() => onRowAction({ user, type: "delete" })}
+              >
+                <Trash2Icon />
+                Delete…
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuGroup>
+        </>
+      )}
     </>
   );
 }

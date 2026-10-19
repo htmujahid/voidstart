@@ -8,11 +8,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useAdminAction } from "@/hooks/use-admin-action";
 import { authClient } from "@/lib/auth/auth-client";
 import type { AdminUser } from "@/lib/queries/admin";
 import { userDisplayName } from "@/lib/user";
-
-import { useAdminAction } from "./use-admin-action";
 
 export function DeleteUserDialog({
   user,

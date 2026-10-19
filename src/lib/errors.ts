@@ -11,3 +11,9 @@ export const notFoundError = (message: string) =>
     message,
     res: Response.json({ error: message }, { status: 404 }),
   });
+
+export const forbiddenError = (message: string) =>
+  new HTTPException(403, {
+    message,
+    res: Response.json({ error: message }, { status: 403 }),
+  });

@@ -12,7 +12,7 @@ const sections = [
     to: "/account/security",
     label: "Security",
     icon: ShieldIcon,
-    visible: (config: AuthConfig) => config.emailSignIn,
+    visible: (config: AuthConfig) => config.emailSignIn || config.passkey.enabled,
   },
   {
     to: "/account/connections",

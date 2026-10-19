@@ -1,3 +1,4 @@
+import { getAuthenticatorName, passkey } from "@better-auth/passkey";
 import { emailOTP, magicLink, twoFactor, username } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { sendEmail } from "void/email";
@@ -158,6 +159,19 @@ export default defineAuth(({ defaults }) => ({
         enabled: true,
         maxFailedAttempts: 10,
         durationSeconds: 60 * 15,
+      },
+    }),
+    passkey({
+      rpName: "locosheet",
+      authenticatorSelection: {
+        residentKey: "preferred",
+        userVerification: "preferred",
+      },
+      registration: {
+        requireSession: true,
+        afterVerification: ({ verification }) => ({
+          name: getAuthenticatorName(verification.registrationInfo?.aaguid) ?? "Passkey",
+        }),
       },
     }),
     authConfigPlugin(),

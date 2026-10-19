@@ -2,6 +2,9 @@ import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { useAuthConfig } from "@/hooks/use-auth-config";
+import { usePasskeySupported } from "@/lib/auth/passkey";
+
+import { PasskeySignInButton } from "./passkey-sign-in-button";
 
 export type AuthMethod = "password" | "magic-link" | "otp";
 
@@ -18,14 +21,16 @@ export function AuthMethodLinks({
   current: AuthMethod;
   redirectTo?: string;
 }) {
-  const { emailSignIn, magicLink, emailOtp } = useAuthConfig();
+  const { emailSignIn, magicLink, emailOtp, passkey } = useAuthConfig();
+  const passkeySupported = usePasskeySupported();
   const enabled: Record<AuthMethod, boolean> = {
     password: emailSignIn,
     "magic-link": magicLink.enabled,
     otp: emailOtp.enabled,
   };
   const others = methods.filter((m) => m.id !== current && enabled[m.id]);
-  if (others.length === 0) return null;
+  const showPasskey = passkey.enabled && passkeySupported;
+  if (others.length === 0 && !showPasskey) return null;
 
   return (
     <div className="grid auto-cols-fr grid-flow-col gap-2">
@@ -39,6 +44,7 @@ export function AuthMethodLinks({
           {m.label}
         </Button>
       ))}
+      <PasskeySignInButton redirectTo={redirectTo} />
     </div>
   );
 }

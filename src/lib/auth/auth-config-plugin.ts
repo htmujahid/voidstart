@@ -23,6 +23,15 @@ export const authConfigPlugin = () =>
           otpOptions?: { digits?: number; period?: number; sendOTP?: unknown };
           backupCodeOptions?: { amount?: number; length?: number };
         }>("two-factor");
+        const passkeyOptions = pluginOptions<{
+          rpName?: string;
+          authenticatorSelection?: {
+            authenticatorAttachment?: "platform" | "cross-platform";
+            residentKey?: string;
+            userVerification?: string;
+          };
+          registration?: { requireSession?: boolean };
+        }>("passkey");
         const magicLinkOptions = pluginOptions<{ expiresIn?: number; disableSignUp?: boolean }>(
           "magic-link",
         );
@@ -77,6 +86,13 @@ export const authConfigPlugin = () =>
               amount: twoFactorOptions?.backupCodeOptions?.amount ?? 10,
               length: twoFactorOptions?.backupCodeOptions?.length ?? 10,
             },
+          },
+          passkey: {
+            enabled: !!passkeyOptions,
+            rpName: passkeyOptions?.rpName ?? appName,
+            authenticatorAttachment:
+              passkeyOptions?.authenticatorSelection?.authenticatorAttachment ?? null,
+            userVerification: passkeyOptions?.authenticatorSelection?.userVerification ?? null,
           },
           magicLink: {
             enabled: !!magicLinkOptions,

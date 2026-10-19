@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
+import { usePasskeyAutofill } from "@/hooks/use-passkey-autofill";
 import { authClient } from "@/lib/auth/auth-client";
 import { isTwoFactorRedirect, twoFactorPath } from "@/lib/auth/two-factor";
 import { safeRedirect, verifyEmailCallbackURL } from "@/lib/redirect";
@@ -29,6 +30,7 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
     emailVerification,
     username,
   } = useAuthConfig();
+  usePasskeyAutofill(redirectTo);
   const [unverifiedEmail, setUnverifiedEmail] = useState<string | null>(null);
 
   const form = useForm({
@@ -112,7 +114,7 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
                           id={field.name}
                           name={field.name}
                           type={username.enabled ? "text" : "email"}
-                          autoComplete={username.enabled ? "username" : "email"}
+                          autoComplete={username.enabled ? "username webauthn" : "email webauthn"}
                           placeholder={
                             username.enabled ? "you@example.com or username" : "you@example.com"
                           }

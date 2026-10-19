@@ -28,3 +28,8 @@ export const sessionsQueryOptions = queryOptions({
   queryKey: ["auth", "sessions"],
   queryFn: async () => unwrap(await authClient.listSessions()),
 });
+
+export const passkeysQueryOptions = queryOptions({
+  queryKey: ["auth", "passkeys"],
+  queryFn: async () => unwrap(await authClient.passkey.listUserPasskeys()),
+});

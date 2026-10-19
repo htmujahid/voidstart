@@ -1,3 +1,4 @@
+import { passkeyClient } from "@better-auth/passkey/client";
 import {
   emailOTPClient,
   magicLinkClient,
@@ -14,6 +15,7 @@ export const authClient = createAuthClient({
     magicLinkClient(),
     emailOTPClient(),
     twoFactorClient(),
+    passkeyClient(),
     authConfigClient(),
   ],
 });

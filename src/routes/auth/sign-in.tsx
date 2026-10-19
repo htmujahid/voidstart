@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-import { SignInForm } from "@/components/auth/sign-in-form";
+import { PasswordSignInForm } from "@/components/auth/password-sign-in-form";
 import { useAuthErrorToast } from "@/hooks/use-auth-error-toast";
 import { redirectSearchSchema } from "@/lib/redirect";
 
@@ -12,5 +12,5 @@ export const Route = createFileRoute("/auth/sign-in")({
 function RouteComponent() {
   const { redirect, error } = Route.useSearch();
   useAuthErrorToast(error);
-  return <SignInForm redirectTo={redirect} />;
+  return <PasswordSignInForm redirectTo={redirect} />;
 }

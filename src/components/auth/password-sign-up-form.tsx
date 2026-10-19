@@ -18,7 +18,7 @@ import { createSignUpSchema } from "./schemas";
 import { SocialProviders } from "./social-providers";
 import { VerifyEmailNotice } from "./verify-email-notice";
 
-export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
+export function PasswordSignUpForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
   const [sentTo, setSentTo] = useState<string | null>(null);
   const { appName, emailAndPassword, emailSignUp, canSignUp } = useAuthConfig();

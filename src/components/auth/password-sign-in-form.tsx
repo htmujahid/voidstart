@@ -21,7 +21,7 @@ import { signInSchema } from "./schemas";
 import { SocialProviders } from "./social-providers";
 import { VerifyEmailNotice } from "./verify-email-notice";
 
-export function SignInForm({ redirectTo }: { redirectTo?: string }) {
+export function PasswordSignInForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
   const {
     appName,

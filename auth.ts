@@ -1,5 +1,12 @@
 import { getAuthenticatorName, passkey } from "@better-auth/passkey";
-import { emailOTP, lastLoginMethod, magicLink, twoFactor, username } from "better-auth/plugins";
+import {
+  bearer,
+  emailOTP,
+  lastLoginMethod,
+  magicLink,
+  twoFactor,
+  username,
+} from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { sendEmail } from "void/email";
 
@@ -16,6 +23,10 @@ export default defineAuth(({ defaults, env }) => {
   return {
     ...defaults,
     appName,
+    trustedOrigins: ((env.TRUSTED_ORIGINS as string | undefined) ?? "")
+      .split(",")
+      .map((origin) => origin.trim())
+      .filter(Boolean),
     emailAndPassword: {
       enabled: true,
       disableSignUp: !signUpEnabled,
@@ -94,6 +105,7 @@ export default defineAuth(({ defaults, env }) => {
       errorURL: "/auth/error",
     },
     plugins: [
+      bearer(),
       username({
         minUsernameLength: 3,
         maxUsernameLength: 30,

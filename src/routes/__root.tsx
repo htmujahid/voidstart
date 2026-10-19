@@ -1,6 +1,7 @@
 import { Suspense, lazy } from "react";
 import type { QueryClient } from "@tanstack/react-query";
 import { HeadContent, Outlet, createRootRouteWithContext, redirect } from "@tanstack/react-router";
+import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 
 import { Toaster } from "@/components/ui/toast";
 import { authClient } from "@/lib/auth/auth-client";
@@ -36,7 +37,9 @@ function RootComponent() {
   return (
     <Toaster>
       <HeadContent />
-      <Outlet />
+      <NuqsAdapter>
+        <Outlet />
+      </NuqsAdapter>
       <Suspense>
         <Devtools />
       </Suspense>

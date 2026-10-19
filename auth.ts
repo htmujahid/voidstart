@@ -1,5 +1,6 @@
 import { getAuthenticatorName, passkey } from "@better-auth/passkey";
 import {
+  admin,
   bearer,
   emailOTP,
   lastLoginMethod,
@@ -102,6 +103,7 @@ export default defineAuth(({ defaults, env }) => {
     },
     plugins: [
       bearer(),
+      admin(),
       username({
         minUsernameLength: 3,
         maxUsernameLength: 30,

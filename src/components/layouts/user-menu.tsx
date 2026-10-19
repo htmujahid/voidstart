@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { LogOutIcon, UserIcon } from "lucide-react";
+import { LogOutIcon, ShieldCheckIcon, UserIcon, UserRoundXIcon } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -11,13 +11,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useImpersonation } from "@/hooks/use-impersonation";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { useUser } from "@/hooks/use-user";
-import { userDisplayName, userInitials } from "@/lib/user";
+import { isAdmin, userDisplayName, userInitials } from "@/lib/user";
 
 export function UserMenu() {
   const user = useUser();
   const signOut = useSignOut();
+  const { impersonating, stop: stopImpersonating } = useImpersonation();
   if (!user) return null;
 
   return (
@@ -46,7 +48,19 @@ export function UserMenu() {
             <UserIcon />
             Account
           </DropdownMenuItem>
+          {isAdmin(user) && (
+            <DropdownMenuItem render={<Link to="/admin" />}>
+              <ShieldCheckIcon />
+              Admin
+            </DropdownMenuItem>
+          )}
         </DropdownMenuGroup>
+        {impersonating && (
+          <DropdownMenuItem onClick={() => void stopImpersonating()}>
+            <UserRoundXIcon />
+            Stop impersonating
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem onClick={signOut}>
           <LogOutIcon />

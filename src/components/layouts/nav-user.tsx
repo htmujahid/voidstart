@@ -5,6 +5,8 @@ import {
   BadgeCheckIcon,
   CreditCardIcon,
   BellIcon,
+  ShieldCheckIcon,
+  UserRoundXIcon,
   LogOutIcon,
 } from "lucide-react";
 
@@ -24,13 +26,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useImpersonation } from "@/hooks/use-impersonation";
 import { useSignOut } from "@/hooks/use-sign-out";
 import { useUser } from "@/hooks/use-user";
-import { userDisplayName, userInitials } from "@/lib/user";
+import { isAdmin, userDisplayName, userInitials } from "@/lib/user";
 
 export function NavUser() {
   const { isMobile } = useSidebar();
   const signOut = useSignOut();
+  const { impersonating, stop: stopImpersonating } = useImpersonation();
   const user = useUser();
   if (!user) return null;
 
@@ -86,6 +90,12 @@ export function NavUser() {
                 <BadgeCheckIcon />
                 Account
               </DropdownMenuItem>
+              {isAdmin(user) && (
+                <DropdownMenuItem render={<Link to="/admin" />}>
+                  <ShieldCheckIcon />
+                  Admin
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem>
                 <CreditCardIcon />
                 Billing
@@ -95,6 +105,12 @@ export function NavUser() {
                 Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
+            {impersonating && (
+              <DropdownMenuItem onClick={() => void stopImpersonating()}>
+                <UserRoundXIcon />
+                Stop impersonating
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={signOut}>
               <LogOutIcon />

@@ -1,5 +1,6 @@
 import { passkeyClient } from "@better-auth/passkey/client";
 import {
+  adminClient,
   emailOTPClient,
   lastLoginMethodClient,
   magicLinkClient,
@@ -18,6 +19,7 @@ export const authClient = createAuthClient({
     twoFactorClient(),
     passkeyClient(),
     lastLoginMethodClient({ cookieName: "last_login_method" }),
+    adminClient(),
     authConfigClient(),
   ],
 });

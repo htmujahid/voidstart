@@ -81,12 +81,12 @@ function DataTableFacetedFilterContent<TData extends RowData, TValue>({
 
   return (
     <Faceted
-      value={multiple ? selectedValues : selectedValues[0]}
+      value={multiple ? selectedValues : (selectedValues[0] ?? "")}
       onValueChange={onValueChange}
       items={options}
       multiple={multiple}
     >
-      <FacetedTrigger render={<Button variant="outline" className="border-dashed" />}>
+      <FacetedTrigger render={<Button variant="outline" />}>
         {hasSelection ? (
           <span
             aria-hidden="true"

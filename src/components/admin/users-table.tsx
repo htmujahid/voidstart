@@ -16,6 +16,7 @@ import {
   type AdminUser,
 } from "@/lib/queries/admin";
 
+import { CreateUserDialog } from "./create-user-dialog";
 import { UserRowActionDialogs } from "./user-row-action-dialogs";
 import type { UserRowAction } from "./user-row-actions";
 import { UsersActionBar } from "./users-action-bar";
@@ -73,7 +74,9 @@ export function UsersTable() {
         className="overflow-visible gap-3 [&_[data-slot=data-table-pagination]]:overflow-visible [&_[data-slot=data-table-pagination]]:px-0"
         actionBar={<UsersActionBar table={table} currentUserId={currentUserId} />}
       >
-        <DataTableToolbar table={table} className="p-0" />
+        <DataTableToolbar table={table} className="p-0">
+          <CreateUserDialog />
+        </DataTableToolbar>
       </DataTable>
       <UserRowActionDialogs action={rowAction} onClose={() => setRowAction(null)} />
     </>

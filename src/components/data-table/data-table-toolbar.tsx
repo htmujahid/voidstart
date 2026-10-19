@@ -49,7 +49,6 @@ export function DataTableToolbar<TData extends RowData>({
               <Button
                 aria-label="Reset filters"
                 variant="outline"
-                className="border-dashed"
                 onClick={onReset}
               >
                 <X />

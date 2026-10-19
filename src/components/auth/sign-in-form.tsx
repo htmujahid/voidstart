@@ -10,11 +10,13 @@ import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { usePasskeyAutofill } from "@/hooks/use-passkey-autofill";
 import { authClient } from "@/lib/auth/auth-client";
+import { loginMethods } from "@/lib/auth/login-methods";
 import { isTwoFactorRedirect, twoFactorPath } from "@/lib/auth/two-factor";
 import { safeRedirect, verifyEmailCallbackURL } from "@/lib/redirect";
 
 import { AuthCard } from "./auth-card";
 import { AuthMethodLinks } from "./auth-method-links";
+import { LastUsedBadge } from "./last-used-badge";
 import { signInSchema } from "./schemas";
 import { SocialProviders } from "./social-providers";
 import { VerifyEmailNotice } from "./verify-email-notice";
@@ -164,9 +166,10 @@ export function SignInForm({ redirectTo }: { redirectTo?: string }) {
                 <Field>
                   <form.Subscribe selector={(s) => s.isSubmitting}>
                     {(isSubmitting) => (
-                      <Button type="submit" disabled={isSubmitting}>
+                      <Button type="submit" className="relative" disabled={isSubmitting}>
                         {isSubmitting && <Spinner />}
                         Sign in
+                        <LastUsedBadge method={loginMethods.password} />
                       </Button>
                     )}
                   </form.Subscribe>

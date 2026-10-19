@@ -9,6 +9,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
+import { loginMethods } from "@/lib/auth/login-methods";
 import { formatDuration } from "@/lib/duration";
 import { safeRedirect } from "@/lib/redirect";
 
@@ -68,6 +69,7 @@ export function OtpForm({ redirectTo }: { redirectTo?: string }) {
       ) : (
         <EmailStepForm
           submitLabel="Email me a code"
+          lastUsedMethod={loginMethods.emailOtp}
           onSubmit={async (address) => {
             if (await sendCode(address)) setEmail(address);
           }}

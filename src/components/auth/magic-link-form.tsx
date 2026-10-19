@@ -5,6 +5,7 @@ import { FieldDescription, FieldGroup } from "@/components/ui/field";
 import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
+import { loginMethods } from "@/lib/auth/login-methods";
 import { formatDuration } from "@/lib/duration";
 import { safeRedirect } from "@/lib/redirect";
 
@@ -64,7 +65,11 @@ export function MagicLinkForm({ redirectTo }: { redirectTo?: string }) {
           </Button>
         </FieldGroup>
       ) : (
-        <EmailStepForm submitLabel="Email me a sign-in link" onSubmit={send}>
+        <EmailStepForm
+          submitLabel="Email me a sign-in link"
+          lastUsedMethod={loginMethods.magicLink}
+          onSubmit={send}
+        >
           <AuthMethodLinks current="magic-link" redirectTo={redirectTo} />
         </EmailStepForm>
       )}

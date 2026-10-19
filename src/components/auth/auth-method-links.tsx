@@ -2,16 +2,18 @@ import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { useAuthConfig } from "@/hooks/use-auth-config";
+import { loginMethods } from "@/lib/auth/login-methods";
 import { usePasskeySupported } from "@/lib/auth/passkey";
 
+import { LastUsedBadge } from "./last-used-badge";
 import { PasskeySignInButton } from "./passkey-sign-in-button";
 
 export type AuthMethod = "password" | "magic-link" | "otp";
 
 const methods = [
-  { id: "password", to: "/auth/sign-in", label: "Password" },
-  { id: "magic-link", to: "/auth/magic-link", label: "Magic link" },
-  { id: "otp", to: "/auth/otp", label: "Email code" },
+  { id: "password", to: "/auth/sign-in", label: "Password", method: loginMethods.password },
+  { id: "magic-link", to: "/auth/magic-link", label: "Magic link", method: loginMethods.magicLink },
+  { id: "otp", to: "/auth/otp", label: "Email code", method: loginMethods.emailOtp },
 ] as const;
 
 export function AuthMethodLinks({
@@ -38,10 +40,12 @@ export function AuthMethodLinks({
         <Button
           key={m.id}
           variant="secondary"
+          className="relative"
           nativeButton={false}
           render={<Link to={m.to} search={{ redirect: redirectTo }} />}
         >
           {m.label}
+          <LastUsedBadge method={m.method} />
         </Button>
       ))}
       <PasskeySignInButton redirectTo={redirectTo} />

@@ -7,8 +7,11 @@ import { Spinner } from "@/components/ui/spinner";
 import { toast } from "@/components/ui/toast";
 import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
+import { loginMethods } from "@/lib/auth/login-methods";
 import { isPasskeyCancelled, usePasskeySupported } from "@/lib/auth/passkey";
 import { safeRedirect } from "@/lib/redirect";
+
+import { LastUsedBadge } from "./last-used-badge";
 
 export function PasskeySignInButton({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
@@ -36,9 +39,16 @@ export function PasskeySignInButton({ redirectTo }: { redirectTo?: string }) {
   }
 
   return (
-    <Button type="button" variant="secondary" disabled={pending} onClick={signIn}>
+    <Button
+      type="button"
+      variant="secondary"
+      className="relative"
+      disabled={pending}
+      onClick={signIn}
+    >
       {pending ? <Spinner /> : <KeyRoundIcon />}
       Passkey
+      <LastUsedBadge method={loginMethods.passkey} />
     </Button>
   );
 }

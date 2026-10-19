@@ -1,5 +1,5 @@
 import { getAuthenticatorName, passkey } from "@better-auth/passkey";
-import { emailOTP, magicLink, twoFactor, username } from "better-auth/plugins";
+import { emailOTP, lastLoginMethod, magicLink, twoFactor, username } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { sendEmail } from "void/email";
 
@@ -177,6 +177,15 @@ export default defineAuth(({ defaults, env }) => {
             name: getAuthenticatorName(verification.registrationInfo?.aaguid) ?? "Passkey",
           }),
         },
+      }),
+      lastLoginMethod({
+        cookieName: "last_login_method",
+        maxAge: 60 * 60 * 24 * 365,
+        storeInDatabase: false,
+        customResolveMethod: (ctx) =>
+          ctx.path === "/sign-in/username" || ctx.path.startsWith("/two-factor/verify")
+            ? "email"
+            : null,
       }),
       authConfigPlugin(),
     ],

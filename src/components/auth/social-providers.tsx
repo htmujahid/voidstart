@@ -8,6 +8,7 @@ import { useAuthConfig } from "@/hooks/use-auth-config";
 import { authClient } from "@/lib/auth/auth-client";
 import { safeRedirect } from "@/lib/redirect";
 
+import { LastUsedBadge } from "./last-used-badge";
 import { socialIcons } from "./social-icons";
 
 const socialProviders = {
@@ -119,11 +120,13 @@ export function SocialProviders({
               key={id}
               type="button"
               variant="outline"
+              className="relative"
               disabled={pending !== null}
               onClick={() => signIn(id)}
             >
               {pending === id ? <Spinner /> : <Icon />}
               Continue with {name}
+              <LastUsedBadge method={id} />
             </Button>
           );
         })}

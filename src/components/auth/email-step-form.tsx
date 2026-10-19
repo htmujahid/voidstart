@@ -6,14 +6,17 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
 
+import { LastUsedBadge } from "./last-used-badge";
 import { emailOnlySchema } from "./schemas";
 
 export function EmailStepForm({
   submitLabel,
+  lastUsedMethod,
   onSubmit,
   children,
 }: {
   submitLabel: string;
+  lastUsedMethod?: string;
   onSubmit: (email: string) => Promise<void>;
   children?: ReactNode;
 }) {
@@ -56,9 +59,10 @@ export function EmailStepForm({
         <Field>
           <form.Subscribe selector={(s) => s.isSubmitting}>
             {(isSubmitting) => (
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" className="relative" disabled={isSubmitting}>
                 {isSubmitting && <Spinner />}
                 {submitLabel}
+                {lastUsedMethod && <LastUsedBadge method={lastUsedMethod} />}
               </Button>
             )}
           </form.Subscribe>

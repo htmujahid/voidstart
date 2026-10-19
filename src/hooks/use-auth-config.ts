@@ -7,14 +7,15 @@ export function useAuthConfig() {
   const { emailAndPassword, socialProviders } = data;
   const hasSocial = socialProviders.length > 0;
   const emailSignIn = emailAndPassword.enabled;
+  const { magicLink, emailOtp } = data;
   const emailSignUp = emailAndPassword.enabled && emailAndPassword.signUp;
 
   return {
     ...data,
     emailSignIn,
     emailSignUp,
-    canSignIn: emailSignIn || hasSocial,
-    canSignUp: emailSignUp || hasSocial,
+    canSignIn: emailSignIn || magicLink.enabled || emailOtp.enabled || hasSocial,
+    canSignUp: emailSignUp || magicLink.enabled || emailOtp.enabled || hasSocial,
     canResetPassword: emailSignIn && emailAndPassword.resetPassword,
     canLinkAccounts: data.account.linking && hasSocial,
   };

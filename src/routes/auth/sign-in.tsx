@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { SignInForm } from "@/components/auth/sign-in-form";
+import { SignInMethods } from "@/components/auth/sign-in-methods";
 import { toast } from "@/components/ui/toast";
 import { redirectSearchSchema } from "@/lib/redirect";
 
@@ -22,5 +22,5 @@ function RouteComponent() {
     });
   }, [error]);
 
-  return <SignInForm redirectTo={redirect} />;
+  return <SignInMethods redirectTo={redirect} />;
 }

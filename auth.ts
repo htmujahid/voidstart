@@ -1,4 +1,4 @@
-import { username } from "better-auth/plugins";
+import { emailOTP, magicLink, username } from "better-auth/plugins";
 import { defineAuth } from "void/auth";
 import { sendEmail } from "void/email";
 
@@ -88,6 +88,38 @@ export default defineAuth(({ defaults }) => ({
     username({
       minUsernameLength: 3,
       maxUsernameLength: 30,
+    }),
+    magicLink({
+      expiresIn: 60 * 5,
+      disableSignUp: false,
+      sendMagicLink: async ({ email, url }) => {
+        const result = await sendEmail({
+          to: email,
+          subject: "Your sign-in link",
+          text: `Sign in using this link:\n${url}\n\nIt expires in 5 minutes. If you didn't request this, you can ignore this email.`,
+        });
+        if (!result.ok) console.error("Failed to send magic link email", result);
+      },
+    }),
+    emailOTP({
+      otpLength: 6,
+      expiresIn: 60 * 5,
+      allowedAttempts: 3,
+      disableSignUp: false,
+      sendVerificationOTP: async ({ email, otp, type }) => {
+        const purpose = {
+          "sign-in": "sign in",
+          "email-verification": "verify your email",
+          "forget-password": "reset your password",
+          "change-email": "change your email",
+        }[type];
+        const result = await sendEmail({
+          to: email,
+          subject: `Your verification code: ${otp}`,
+          text: `Use this code to ${purpose}:\n\n${otp}\n\nIt expires in 5 minutes. If you didn't request this, you can ignore this email.`,
+        });
+        if (!result.ok) console.error("Failed to send verification code email", result);
+      },
     }),
     authConfigPlugin(),
   ],

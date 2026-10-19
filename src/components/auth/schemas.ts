@@ -36,10 +36,9 @@ export const signInSchema = z.object({
   password: z.string().min(1, "Password is required."),
 });
 
-export const createSignUpSchema = (rules: PasswordRules, usernameRules?: UsernameRules) =>
+export const createSignUpSchema = (rules: PasswordRules) =>
   z
     .object({
-      username: usernameRules ? createUsernameSchema(usernameRules) : z.string(),
       email: emailSchema,
       password: createPasswordSchema(rules),
       confirmPassword: z.string(),
@@ -55,3 +54,5 @@ export const createResetPasswordSchema = (rules: PasswordRules) =>
       confirmPassword: z.string(),
     })
     .refine((v) => v.password === v.confirmPassword, confirmPassword);
+
+export const emailOnlySchema = z.object({ email: emailSchema });

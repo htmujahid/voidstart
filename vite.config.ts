@@ -24,6 +24,21 @@ export default defineConfig({
     react(),
     tailwindcss(),
     voidPlugin(),
+    // voidPlugin aliases the "better-auth/client" prefix in dev, which also captures
+    // "better-auth/client/plugins". Alias is first-match-wins, so this must come after it.
+    {
+      name: "better-auth-client-plugins",
+      config: () => ({
+        resolve: {
+          alias: [
+            {
+              find: /^better-auth\/client\/plugins$/,
+              replacement: fileURLToPath(import.meta.resolve("better-auth/client/plugins")),
+            },
+          ],
+        },
+      }),
+    },
   ],
   fmt: {
     sortImports: {

@@ -2,7 +2,6 @@ import { useMemo, useState } from "react";
 import { useForm } from "@tanstack/react-form";
 import { Link, useRouter } from "@tanstack/react-router";
 
-import { TextField } from "@/components/account/text-field";
 import { Button } from "@/components/ui/button";
 import { Field, FieldDescription, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
@@ -21,28 +20,21 @@ import { VerifyEmailNotice } from "./verify-email-notice";
 export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
   const router = useRouter();
   const [sentTo, setSentTo] = useState<string | null>(null);
-  const { appName, emailAndPassword, emailSignUp, canSignUp, username } = useAuthConfig();
+  const { appName, emailAndPassword, emailSignUp, canSignUp } = useAuthConfig();
   const { minPasswordLength, maxPasswordLength, requireEmailVerification, autoSignIn } =
     emailAndPassword;
-  const { minUsernameLength, maxUsernameLength } = username;
   const signUpSchema = useMemo(
-    () =>
-      createSignUpSchema(
-        { minPasswordLength, maxPasswordLength },
-        username.enabled ? { minUsernameLength, maxUsernameLength } : undefined,
-      ),
-    [minPasswordLength, maxPasswordLength, username.enabled, minUsernameLength, maxUsernameLength],
+    () => createSignUpSchema({ minPasswordLength, maxPasswordLength }),
+    [minPasswordLength, maxPasswordLength],
   );
 
   const form = useForm({
-    defaultValues: { username: "", email: "", password: "", confirmPassword: "" },
+    defaultValues: { email: "", password: "", confirmPassword: "" },
     validators: { onSubmit: signUpSchema },
     onSubmit: async ({ value }) => {
       const { email, password } = value;
-      const handle = value.username.trim();
       const { error } = await authClient.signUp.email({
-        name: username.enabled ? handle : email.split("@")[0],
-        ...(username.enabled && { username: handle }),
+        name: email.split("@")[0],
         email,
         password,
         callbackURL: verifyEmailCallbackURL(redirectTo),
@@ -102,19 +94,6 @@ export function SignUpForm({ redirectTo }: { redirectTo?: string }) {
             <SocialProviders action="Sign up" redirectTo={redirectTo} showEmail={emailSignUp} />
             {emailSignUp && (
               <>
-                {username.enabled && (
-                  <form.Field name="username">
-                    {(field) => (
-                      <TextField
-                        field={field}
-                        label="Username"
-                        autoComplete="username"
-                        placeholder="johndoe"
-                      />
-                    )}
-                  </form.Field>
-                )}
-
                 <form.Field name="email">
                   {(field) => {
                     const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;

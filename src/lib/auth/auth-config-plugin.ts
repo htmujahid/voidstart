@@ -7,9 +7,16 @@ export const authConfigPlugin = () =>
     endpoints: {
       getConfig: createAuthEndpoint("/config", { method: "GET" }, async (ctx) => {
         const { options, appName, password, socialProviders } = ctx.context;
-        const usernameOptions = options.plugins?.find((p) => p.id === "username")?.options as
-          | { minUsernameLength?: number; maxUsernameLength?: number }
-          | undefined;
+        const pluginOptions = <T>(id: string) =>
+          options.plugins?.find((p) => p.id === id)?.options as T | undefined;
+        const usernameOptions = pluginOptions<{
+          minUsernameLength?: number;
+          maxUsernameLength?: number;
+        }>("username");
+        const magicLinkOptions = pluginOptions<{ expiresIn?: number }>("magic-link");
+        const emailOtpOptions = pluginOptions<{ otpLength?: number; expiresIn?: number }>(
+          "email-otp",
+        );
         const { emailAndPassword, emailVerification, user, account } = options;
 
         return ctx.json({
@@ -35,6 +42,15 @@ export const authConfigPlugin = () =>
           account: {
             linking: account?.accountLinking?.enabled ?? true,
             allowUnlinkingAll: account?.accountLinking?.allowUnlinkingAll ?? false,
+          },
+          magicLink: {
+            enabled: !!magicLinkOptions,
+            expiresIn: magicLinkOptions?.expiresIn ?? 60 * 5,
+          },
+          emailOtp: {
+            enabled: !!emailOtpOptions,
+            otpLength: emailOtpOptions?.otpLength ?? 6,
+            expiresIn: emailOtpOptions?.expiresIn ?? 60 * 5,
           },
           username: {
             enabled: !!usernameOptions,

@@ -59,8 +59,16 @@ export default defineAuth(({ defaults, env }) => {
     },
     user: {
       changeEmail: {
-        enabled: false,
+        enabled: true,
         updateEmailWithoutVerification: false,
+        sendChangeEmailConfirmation: async ({ user, newEmail, url }) => {
+          const result = await sendEmail({
+            to: user.email,
+            subject: "Approve your email change",
+            text: `${greeting(user.name)}\n\nSomeone asked to change the email on your account to ${newEmail}. Approve the change using this link:\n${url}\n\nWe'll then ask you to confirm the new address. If this wasn't you, ignore this email and consider changing your password.`,
+          });
+          if (!result.ok) console.error("Failed to send email change confirmation", result);
+        },
       },
       deleteUser: {
         enabled: true,

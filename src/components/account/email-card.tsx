@@ -37,11 +37,19 @@ export function EmailCard() {
         });
         return;
       }
-      toast.add({
-        type: "success",
-        title: "Check your email",
-        description: `We sent a confirmation link to ${value.newEmail}.`,
-      });
+      toast.add(
+        user?.emailVerified
+          ? {
+              type: "success",
+              title: "Check your current inbox",
+              description: `Approve the change from the link we sent to ${user.email}. We'll then ask you to confirm ${value.newEmail}.`,
+            }
+          : {
+              type: "success",
+              title: "Check your new inbox",
+              description: `We sent a confirmation link to ${value.newEmail}.`,
+            },
+      );
       form.reset();
     },
   });
@@ -108,7 +116,11 @@ export function EmailCard() {
     >
       <SettingsCard
         title="Email"
-        description="Changing your email requires confirming the new address."
+        description={
+          user.emailVerified
+            ? "Changing your email needs approval from your current address, then confirmation of the new one."
+            : "Changing your email requires confirming the new address."
+        }
         footer={
           <>
             {resendButton}
@@ -125,7 +137,15 @@ export function EmailCard() {
       >
         <FieldGroup>
           {status}
-          <form.Field name="newEmail">
+          <form.Field
+            name="newEmail"
+            validators={{
+              onSubmit: ({ value }) =>
+                value.trim().toLowerCase() === user.email.toLowerCase()
+                  ? "That's already your email address."
+                  : undefined,
+            }}
+          >
             {(field) => (
               <TextField
                 field={field}

@@ -13,7 +13,18 @@ const generated = [
   "src/routeTree.gen.ts",
   "db/migrations/**",
 ];
-const vendored = ["src/components/ui/**", ".agents/**", ".claude/**"];
+const vendored = [
+  "src/components/ui/**",
+  // Dice UI data table (installed with the shadcn CLI)
+  "src/components/data-table/**",
+  "src/hooks/use-data-table.ts",
+  "src/hooks/use-debounced-callback.ts",
+  "src/lib/data-table-*.ts",
+  "src/lib/format.ts",
+  "src/lib/id.ts",
+  ".agents/**",
+  ".claude/**",
+];
 
 export default defineConfig({
   resolve: {

@@ -1,28 +1,41 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import {
+  CalendarIcon,
+  ShieldCheckIcon,
+  ShieldIcon,
+  Text,
+  UserIcon,
+  UserRoundIcon,
+} from "lucide-react";
 
+import { getDataTableActionsColumn } from "@/components/data-table/data-table-actions-column";
 import { DataTableColumnHeader } from "@/components/data-table/data-table-column-header";
+import { getDataTableSelectColumn } from "@/components/data-table/data-table-select-column";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import type { AdminUser } from "@/lib/queries/admin";
-import { userDisplayName, userInitials } from "@/lib/user";
+import type { DataTableFeatures } from "@/lib/data-table-features";
+import { getColumnOptions } from "@/lib/data-table-parsers";
+import { formatDate } from "@/lib/format";
+import { usersColumnConfigs, type AdminUser } from "@/lib/queries/admin";
+import { isAdmin, userDisplayName, userInitials } from "@/lib/user";
 
-import { UserActions } from "./user-actions";
+import { UserRowActions, type UserRowAction } from "./user-actions";
 
-const dateFormat = new Intl.DateTimeFormat(undefined, { dateStyle: "medium" });
-
-function banSummary(user: AdminUser) {
-  const parts = [
-    user.banReason,
-    user.banExpires && `until ${dateFormat.format(new Date(user.banExpires))}`,
-  ];
-  return parts.filter(Boolean).join(" · ") || "Banned";
+interface CreateUsersColumnsOptions {
+  currentUserId: string;
+  onRowAction: (action: UserRowAction) => void;
 }
 
-export function createUsersColumns(currentUserId: string): ColumnDef<AdminUser>[] {
+export function createUsersColumns({
+  currentUserId,
+  onRowAction,
+}: CreateUsersColumnsOptions): ColumnDef<DataTableFeatures, AdminUser>[] {
   return [
+    getDataTableSelectColumn<AdminUser>(),
     {
+      id: "name",
       accessorKey: "name",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Name" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} label="Name" />,
       cell: ({ row }) => {
         const user = row.original;
         return (
@@ -36,56 +49,92 @@ export function createUsersColumns(currentUserId: string): ColumnDef<AdminUser>[
           </div>
         );
       },
+      meta: { label: "Name", icon: UserRoundIcon },
+      size: 220,
+      ...getColumnOptions(usersColumnConfigs.name),
     },
     {
+      id: "email",
       accessorKey: "email",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Email" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} label="Email" />,
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <span className="truncate">{row.original.email}</span>
           {!row.original.emailVerified && <Badge variant="outline">Unverified</Badge>}
         </div>
       ),
+      meta: { label: "Email", placeholder: "Search emails…", variant: "text", icon: Text },
+      size: 280,
+      ...getColumnOptions(usersColumnConfigs.email),
     },
     {
-      accessorKey: "role",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Role" />,
+      id: "role",
+      accessorFn: (user) => user.role || "user",
+      header: ({ column }) => <DataTableColumnHeader column={column} label="Role" />,
       cell: ({ row }) => {
         const role = row.original.role || "user";
-        return <Badge variant={role.includes("admin") ? "default" : "secondary"}>{role}</Badge>;
+        return <Badge variant={isAdmin(row.original) ? "default" : "secondary"}>{role}</Badge>;
       },
+      meta: {
+        label: "Role",
+        variant: "select",
+        options: [
+          { label: "Admin", value: "admin", icon: ShieldCheckIcon },
+          { label: "User", value: "user", icon: UserIcon },
+        ],
+        icon: ShieldIcon,
+      },
+      size: 120,
+      ...getColumnOptions(usersColumnConfigs.role),
     },
     {
       id: "status",
-      enableSorting: false,
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Status" />,
-      cell: ({ row }) =>
-        row.original.banned ? (
-          <Badge variant="destructive" title={banSummary(row.original)}>
+      accessorFn: (user) => (user.banned ? "banned" : "active"),
+      header: ({ column }) => <DataTableColumnHeader column={column} label="Status" />,
+      cell: ({ row }) => {
+        const user = row.original;
+        return user.banned ? (
+          <Badge
+            variant="destructive"
+            title={
+              [user.banReason, user.banExpires && `until ${formatDate(user.banExpires)}`]
+                .filter(Boolean)
+                .join(" · ") || "Banned"
+            }
+          >
             Banned
           </Badge>
         ) : (
           <Badge variant="outline">Active</Badge>
-        ),
+        );
+      },
+      meta: { label: "Status" },
+      size: 110,
+      enableSorting: false,
     },
     {
+      id: "createdAt",
       accessorKey: "createdAt",
-      header: ({ column }) => <DataTableColumnHeader column={column} title="Created" />,
+      header: ({ column }) => <DataTableColumnHeader column={column} label="Created" />,
       cell: ({ row }) => (
         <span className="text-muted-foreground">
-          {dateFormat.format(new Date(row.original.createdAt))}
+          {formatDate(row.original.createdAt, { month: "short" })}
         </span>
       ),
+      meta: { label: "Created", icon: CalendarIcon },
+      size: 130,
+      ...getColumnOptions(usersColumnConfigs.createdAt),
     },
-    {
-      id: "actions",
-      enableSorting: false,
-      header: () => <span className="sr-only">Actions</span>,
-      cell: ({ row }) => (
-        <div className="flex justify-end">
-          <UserActions user={row.original} isSelf={row.original.id === currentUserId} />
-        </div>
+    getDataTableActionsColumn<AdminUser>({
+      contentClassName: "min-w-52",
+      actions: ({ row }) => (
+        <UserRowActions
+          user={row.original}
+          isSelf={row.original.id === currentUserId}
+          onRowAction={onRowAction}
+        />
       ),
-    },
+      getAriaLabel: (row) => `Open actions for ${userDisplayName(row.original)}`,
+    }),
   ];
 }

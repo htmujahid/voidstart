@@ -1,33 +1,60 @@
 import { keepPreviousData, queryOptions } from "@tanstack/react-query";
 
 import { authClient } from "@/lib/auth/auth-client";
+import { getDataTableSearchParams } from "@/lib/data-table-parsers";
+import type {
+  ColumnSortItem,
+  DataTableColumnConfigs,
+  DataTableColumnConfigsQuery,
+} from "@/lib/data-table-types";
 
-export interface UsersParams {
-  q: string;
-  in: "email" | "name";
-  filter: "admin" | "user" | "banned" | null;
-  sort: "createdAt" | "name" | "email" | "role";
-  dir: "asc" | "desc";
-  page: number;
-  size: number;
-}
+/**
+ * Shared by the URL parsers, the columns and the query below, so they can't drift.
+ *
+ * `admin.listUsers` takes one search, one filter and one sort, so only `email` (search)
+ * and `role` (filter) are filterable. Everything else is sortable or display-only.
+ */
+export const usersColumnConfigs = {
+  name: {},
+  email: { variant: "text" },
+  role: { variant: "select" },
+  createdAt: {},
+} satisfies DataTableColumnConfigs;
 
-async function fetchUsers(params: UsersParams) {
-  const { q, filter, size } = params;
+const DEFAULT_SORTING: ColumnSortItem<"createdAt">[] = [{ id: "createdAt", desc: true }];
+
+export const USERS_DEFAULT_SORTING = DEFAULT_SORTING;
+
+export const usersSearchParams = getDataTableSearchParams({
+  columnConfigs: usersColumnConfigs,
+  defaultSorting: DEFAULT_SORTING,
+  defaultPerPage: 10,
+});
+
+export type UsersQuery = DataTableColumnConfigsQuery<typeof usersColumnConfigs>;
+
+async function fetchUsers({ filters, sorting, page, perPage }: UsersQuery) {
+  const email = filters.find((filter) => filter.id === "email");
+  const roles = [filters.find((filter) => filter.id === "role")?.value ?? []]
+    .flat()
+    .filter(Boolean);
+  const [sort] = sorting;
+  const search = typeof email?.value === "string" ? email.value.trim() : "";
+
   const { data, error } = await authClient.admin.listUsers({
     query: {
-      searchValue: q || undefined,
-      searchField: params.in,
-      searchOperator: "contains",
-      sortBy: params.sort,
-      sortDirection: params.dir,
-      limit: size,
-      offset: (Math.max(params.page, 1) - 1) * size,
-      ...(filter === "banned"
-        ? { filterField: "banned", filterValue: true, filterOperator: "eq" }
-        : filter
-          ? { filterField: "role", filterValue: filter, filterOperator: "eq" }
-          : {}),
+      limit: perPage,
+      offset: (page - 1) * perPage,
+      sortBy: sort?.id,
+      sortDirection: sort?.desc ? "desc" : "asc",
+      ...(search ? { searchField: "email", searchOperator: "contains", searchValue: search } : {}),
+      ...(roles.length
+        ? {
+            filterField: "role",
+            filterOperator: roles.length === 1 ? "eq" : "in",
+            filterValue: roles.length === 1 ? roles[0] : roles,
+          }
+        : {}),
     },
   });
   if (error) throw new Error(error.message ?? `Request failed (${error.status})`);
@@ -38,9 +65,9 @@ export type AdminUser = Awaited<ReturnType<typeof fetchUsers>>["users"][number];
 
 export const usersKey = ["admin", "users"] as const;
 
-export const usersQueryOptions = (params: UsersParams) =>
+export const usersQueryOptions = (query: UsersQuery) =>
   queryOptions({
-    queryKey: [...usersKey, params],
-    queryFn: () => fetchUsers(params),
+    queryKey: [...usersKey, query],
+    queryFn: () => fetchUsers(query),
     placeholderData: keepPreviousData,
   });

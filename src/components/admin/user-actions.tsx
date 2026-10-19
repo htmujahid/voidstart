@@ -4,7 +4,6 @@ import { useNavigate } from "@tanstack/react-router";
 import {
   BanIcon,
   LogOutIcon,
-  MoreHorizontalIcon,
   ShieldCheckIcon,
   ShieldOffIcon,
   Trash2Icon,
@@ -33,13 +32,10 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,16 +62,17 @@ const BAN_DURATIONS = [
 
 type ApiResult = { error: { message?: string } | null };
 
-export function UserActions({ user, isSelf }: { user: AdminUser; isSelf: boolean }) {
-  const queryClient = useQueryClient();
-  const navigate = useNavigate();
-  const [banOpen, setBanOpen] = useState(false);
-  const [removeOpen, setRemoveOpen] = useState(false);
-  const name = userDisplayName(user);
-  const userIsAdmin = isAdmin(user);
+/** A row action that needs a confirmation dialog, hosted outside the (unmounting) row menu. */
+export interface UserRowAction {
+  user: AdminUser;
+  type: "ban" | "delete";
+}
 
-  /** Runs an admin call, toasts the outcome and refreshes the table. Returns whether it succeeded. */
-  async function run(call: () => Promise<ApiResult>, success: string, failure: string) {
+/** Runs an admin call, toasts the outcome and refreshes the users table. Resolves to success. */
+export function useAdminAction() {
+  const queryClient = useQueryClient();
+
+  return async function run(call: () => Promise<ApiResult>, success: string, failure: string) {
     const { error } = await call();
     if (error) {
       toast.add({
@@ -88,7 +85,23 @@ export function UserActions({ user, isSelf }: { user: AdminUser; isSelf: boolean
     toast.add({ type: "success", title: success });
     await queryClient.invalidateQueries({ queryKey: usersKey });
     return true;
-  }
+  };
+}
+
+/** Menu items for one user, rendered inside the actions column's dropdown. */
+export function UserRowActions({
+  user,
+  isSelf,
+  onRowAction,
+}: {
+  user: AdminUser;
+  isSelf: boolean;
+  onRowAction: (action: UserRowAction) => void;
+}) {
+  const run = useAdminAction();
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const userIsAdmin = isAdmin(user);
 
   async function impersonate() {
     const { error } = await authClient.admin.impersonateUser({ userId: user.id });
@@ -106,92 +119,98 @@ export function UserActions({ user, isSelf }: { user: AdminUser; isSelf: boolean
 
   return (
     <>
-      <DropdownMenu>
-        <DropdownMenuTrigger
-          render={<Button variant="ghost" size="icon-sm" aria-label={`Actions for ${name}`} />}
+      <DropdownMenuGroup>
+        <DropdownMenuLabel className="truncate">{userDisplayName(user)}</DropdownMenuLabel>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        {!isSelf && (
+          <DropdownMenuItem onClick={() => void impersonate()}>
+            <UserRoundCogIcon />
+            Impersonate
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem
+          disabled={isSelf}
+          onClick={() =>
+            void run(
+              () =>
+                authClient.admin.setRole({ userId: user.id, role: userIsAdmin ? "user" : "admin" }),
+              userIsAdmin ? "Admin role removed" : "Made admin",
+              "Couldn't change role",
+            )
+          }
         >
-          <MoreHorizontalIcon />
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="min-w-52">
-          <DropdownMenuGroup>
-            <DropdownMenuLabel className="truncate">{name}</DropdownMenuLabel>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            {!isSelf && (
-              <DropdownMenuItem onClick={() => void impersonate()}>
-                <UserRoundCogIcon />
-                Impersonate
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              disabled={isSelf}
-              onClick={() =>
-                void run(
-                  () =>
-                    authClient.admin.setRole({
-                      userId: user.id,
-                      role: userIsAdmin ? "user" : "admin",
-                    }),
-                  userIsAdmin ? "Admin role removed" : "Made admin",
-                  "Couldn't change role",
-                )
-              }
-            >
-              {userIsAdmin ? <ShieldOffIcon /> : <ShieldCheckIcon />}
-              {userIsAdmin ? "Remove admin" : "Make admin"}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() =>
-                void run(
-                  () => authClient.admin.revokeUserSessions({ userId: user.id }),
-                  "Sessions revoked",
-                  "Couldn't revoke sessions",
-                )
-              }
-            >
-              <LogOutIcon />
-              Revoke sessions
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            {user.banned ? (
-              <DropdownMenuItem
-                onClick={() =>
-                  void run(
-                    () => authClient.admin.unbanUser({ userId: user.id }),
-                    "User unbanned",
-                    "Couldn't unban user",
-                  )
-                }
-              >
-                <UserCheckIcon />
-                Unban
-              </DropdownMenuItem>
-            ) : (
-              <DropdownMenuItem disabled={isSelf} onClick={() => setBanOpen(true)}>
-                <BanIcon />
-                Ban…
-              </DropdownMenuItem>
-            )}
-            <DropdownMenuItem
-              variant="destructive"
-              disabled={isSelf}
-              onClick={() => setRemoveOpen(true)}
-            >
-              <Trash2Icon />
-              Delete…
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-        </DropdownMenuContent>
-      </DropdownMenu>
+          {userIsAdmin ? <ShieldOffIcon /> : <ShieldCheckIcon />}
+          {userIsAdmin ? "Remove admin" : "Make admin"}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() =>
+            void run(
+              () => authClient.admin.revokeUserSessions({ userId: user.id }),
+              "Sessions revoked",
+              "Couldn't revoke sessions",
+            )
+          }
+        >
+          <LogOutIcon />
+          Revoke sessions
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+      <DropdownMenuGroup>
+        {user.banned ? (
+          <DropdownMenuItem
+            onClick={() =>
+              void run(
+                () => authClient.admin.unbanUser({ userId: user.id }),
+                "User unbanned",
+                "Couldn't unban user",
+              )
+            }
+          >
+            <UserCheckIcon />
+            Unban
+          </DropdownMenuItem>
+        ) : (
+          <DropdownMenuItem disabled={isSelf} onClick={() => onRowAction({ user, type: "ban" })}>
+            <BanIcon />
+            Ban…
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem
+          variant="destructive"
+          disabled={isSelf}
+          onClick={() => onRowAction({ user, type: "delete" })}
+        >
+          <Trash2Icon />
+          Delete…
+        </DropdownMenuItem>
+      </DropdownMenuGroup>
+    </>
+  );
+}
 
+/** Confirmation dialogs for the actions in {@link UserRowAction}. */
+export function UserRowActionDialogs({
+  action,
+  onClose,
+}: {
+  action: UserRowAction | null;
+  onClose: () => void;
+}) {
+  const run = useAdminAction();
+  const user = action?.user;
+  const name = user ? userDisplayName(user) : "";
+
+  return (
+    <>
       <BanDialog
-        open={banOpen}
-        onOpenChange={setBanOpen}
+        open={action?.type === "ban"}
+        onOpenChange={(open) => !open && onClose()}
         name={name}
         onConfirm={async (reason, duration) => {
+          if (!user) return;
           const ok = await run(
             () =>
               authClient.admin.banUser({
@@ -202,11 +221,10 @@ export function UserActions({ user, isSelf }: { user: AdminUser; isSelf: boolean
             "User banned",
             "Couldn't ban user",
           );
-          if (ok) setBanOpen(false);
+          if (ok) onClose();
         }}
       />
-
-      <AlertDialog open={removeOpen} onOpenChange={setRemoveOpen}>
+      <AlertDialog open={action?.type === "delete"} onOpenChange={(open) => !open && onClose()}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete {name}?</AlertDialogTitle>
@@ -220,6 +238,7 @@ export function UserActions({ user, isSelf }: { user: AdminUser; isSelf: boolean
             <AlertDialogAction
               variant="destructive"
               onClick={() =>
+                user &&
                 void run(
                   () => authClient.admin.removeUser({ userId: user.id }),
                   "User deleted",

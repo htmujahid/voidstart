@@ -3,6 +3,7 @@ import {
   ChevronsUpDownIcon,
   SparklesIcon,
   BadgeCheckIcon,
+  HouseIcon,
   CreditCardIcon,
   BellIcon,
   ShieldCheckIcon,
@@ -86,6 +87,10 @@ export function NavUser() {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
+              <DropdownMenuItem render={<Link to="/home" />}>
+                <HouseIcon />
+                Home
+              </DropdownMenuItem>
               <DropdownMenuItem render={<Link to="/account/profile" />}>
                 <BadgeCheckIcon />
                 Account

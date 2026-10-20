@@ -26,11 +26,11 @@ import { useUser } from "@/hooks/use-user";
 import { authClient } from "@/lib/auth/auth-client";
 import {
   DEFAULT_ROLE,
-  hasAdminRole,
+  ROLE_META,
   type Permissions,
   type RoleName,
-} from "@/lib/auth/permissions";
-import { ROLE_OPTIONS } from "@/lib/auth/roles";
+} from "@/lib/auth/access-data";
+import { hasAdminRole } from "@/lib/auth/access-utils";
 import type { AdminUser } from "@/lib/queries/admin";
 import { userCan, userDisplayName } from "@/lib/user";
 
@@ -112,10 +112,9 @@ export function UserRowActions({
                       )
                     }
                   >
-                    {ROLE_OPTIONS.map((option) => (
-                      <DropdownMenuRadioItem key={option.value} value={option.value}>
-                        <option.icon />
-                        {option.label}
+                    {Object.entries(ROLE_META).map(([value, { label }]) => (
+                      <DropdownMenuRadioItem key={value} value={value}>
+                        {label}
                       </DropdownMenuRadioItem>
                     ))}
                   </DropdownMenuRadioGroup>

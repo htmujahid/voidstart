@@ -2,7 +2,8 @@ import { CheckIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/hooks/use-user";
-import { getGrantedPermissions, getRoleNames, ROLE_META } from "@/lib/auth/permissions";
+import { ROLE_META } from "@/lib/auth/access-data";
+import { getGrantedPermissions, getRoleNames } from "@/lib/auth/access-utils";
 
 import { SettingsCard } from "./settings-card";
 

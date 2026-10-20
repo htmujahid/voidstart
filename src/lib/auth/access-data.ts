@@ -21,7 +21,7 @@ export const userRole = ac.newRole({
   tasks: ["create", "list", "get", "update"],
 });
 
-const roles = { admin: adminRole, user: userRole };
+export const roles = { admin: adminRole, user: userRole };
 
 export type RoleName = keyof typeof roles;
 
@@ -36,36 +36,3 @@ export const ADMIN_ROLES: RoleName[] = ["admin"];
 export type Permissions = {
   [Name in keyof typeof statement]?: ReadonlyArray<(typeof statement)[Name][number]>;
 };
-
-export function getRoleNames(role: string | null | undefined) {
-  return (role || DEFAULT_ROLE)
-    .split(",")
-    .map((name) => name.trim())
-    .filter((name): name is RoleName => name in roles);
-}
-
-export function can(role: string | null | undefined, permissions: Permissions) {
-  return getRoleNames(role).some((name) => roles[name].authorize(permissions).success);
-}
-
-export function hasAdminRole(role: string | null | undefined) {
-  return getRoleNames(role).some((name) => ADMIN_ROLES.includes(name));
-}
-
-export function getRoleLabel(role: string | null | undefined) {
-  return getRoleNames(role)
-    .map((name) => ROLE_META[name].label)
-    .join(", ");
-}
-
-export function getGrantedPermissions(role: string | null | undefined) {
-  const names = getRoleNames(role);
-  return Object.entries(statement).map(([resource, actions]) => ({
-    resource,
-    actions: actions.filter((action) =>
-      names.some((name) =>
-        (roles[name].statements as Record<string, readonly string[]>)[resource]?.includes(action),
-      ),
-    ),
-  }));
-}

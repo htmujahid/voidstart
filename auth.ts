@@ -13,7 +13,7 @@ import { sendEmail } from "void/email";
 
 import { DEFAULT_APP_NAME } from "./src/lib/app.ts";
 import { authConfigPlugin } from "./src/lib/auth/auth-config-plugin.ts";
-import { ac, ADMIN_ROLES, adminRole, DEFAULT_ROLE, userRole } from "./src/lib/auth/permissions.ts";
+import { ac, ADMIN_ROLES, adminRole, DEFAULT_ROLE, userRole } from "./src/lib/auth/access-data.ts";
 
 const signUpEnabled = true;
 

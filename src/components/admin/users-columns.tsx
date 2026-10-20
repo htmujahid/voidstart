@@ -6,8 +6,8 @@ import { DataTableColumnHeader } from "@/components/data-table/data-table-column
 import { getDataTableSelectColumn } from "@/components/data-table/data-table-select-column";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { getRoleLabel, hasAdminRole } from "@/lib/auth/permissions";
-import { ROLE_OPTIONS } from "@/lib/auth/roles";
+import { ROLE_META } from "@/lib/auth/access-data";
+import { getRoleLabel, hasAdminRole } from "@/lib/auth/access-utils";
 import type { DataTableFeatures } from "@/lib/data-table-features";
 import { getColumnOptions } from "@/lib/data-table-parsers";
 import { formatDate } from "@/lib/format";
@@ -76,7 +76,7 @@ export function createUsersColumns({
       meta: {
         label: "Role",
         variant: "select",
-        options: ROLE_OPTIONS,
+        options: Object.entries(ROLE_META).map(([value, { label }]) => ({ value, label })),
         icon: ShieldIcon,
       },
       size: 120,

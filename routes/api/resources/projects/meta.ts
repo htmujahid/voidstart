@@ -1,7 +1,7 @@
 import { defineHandler } from "void";
 import { z } from "zod";
 
-import { requirePermission } from "@/lib/auth/require-permission";
+import { requirePermission } from "@/lib/auth/access-utils";
 import { projectsColumnsMeta, projectsTableMeta } from "@/resources/projects/projects.meta";
 import {
   projectsInsertSchema,

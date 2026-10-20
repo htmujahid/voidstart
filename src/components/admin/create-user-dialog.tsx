@@ -26,8 +26,7 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { useAdminAction } from "@/hooks/use-admin-action";
 import { authClient } from "@/lib/auth/auth-client";
-import { DEFAULT_ROLE, type RoleName } from "@/lib/auth/permissions";
-import { ROLE_OPTIONS } from "@/lib/auth/roles";
+import { DEFAULT_ROLE, ROLE_META, type RoleName } from "@/lib/auth/access-data";
 
 const defaultValues = {
   name: "",
@@ -131,10 +130,9 @@ export function CreateUserDialog() {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {ROLE_OPTIONS.map((role) => (
-                        <SelectItem key={role.value} value={role.value}>
-                          <role.icon />
-                          {role.label}
+                      {Object.entries(ROLE_META).map(([value, { label }]) => (
+                        <SelectItem key={value} value={value}>
+                          {label}
                         </SelectItem>
                       ))}
                     </SelectContent>

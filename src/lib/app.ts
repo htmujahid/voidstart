@@ -1,1 +1,1 @@
-export const DEFAULT_APP_NAME = "locosheet";
+export const DEFAULT_APP_NAME = "voidstart";

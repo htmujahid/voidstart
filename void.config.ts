@@ -12,5 +12,5 @@ export default defineConfig({
   // cover, so enable email (and the local dev inbox) explicitly.
   inference: { bindings: { email: true } },
   // Default sender for sendEmail(). Replace the domain with one you own before deploying.
-  email: { from: "locosheet <noreply@locosheet.app>" },
+  email: { from: "voidstart <noreply@locosheet.app>" },
 });

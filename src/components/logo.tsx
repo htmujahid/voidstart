@@ -1,7 +1,7 @@
 import { cn } from "cn";
 
 /**
- * locosheet mark: a sheet grid of modular blocks, with the last cell left
+ * voidstart mark: a sheet grid of modular blocks, with the last cell left
  * as a "+" for whatever you build next. Uses currentColor.
  */
 export function Logo({ className, ...props }: React.ComponentProps<"svg">) {

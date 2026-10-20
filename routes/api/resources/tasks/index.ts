@@ -1,6 +1,6 @@
 import { defineHandler } from "void";
 
-import { requirePermission } from "@/lib/auth/access-utils";
+import { requirePermission } from "@/lib/auth/access-server";
 import { tasksEvents } from "@/resources/tasks/tasks.event";
 import { tasksHooks } from "@/resources/tasks/tasks.hooks";
 import { tasksRepository } from "@/resources/tasks/tasks.repository";

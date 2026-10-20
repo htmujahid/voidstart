@@ -1,6 +1,6 @@
 import { defineHandler } from "void";
 
-import { requirePermission } from "@/lib/auth/access-utils";
+import { requirePermission } from "@/lib/auth/access-server";
 import { projectsEvents } from "@/resources/projects/projects.event";
 import { projectsHooks } from "@/resources/projects/projects.hooks";
 import { projectsRepository } from "@/resources/projects/projects.repository";

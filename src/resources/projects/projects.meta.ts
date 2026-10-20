@@ -1,23 +1,59 @@
-import type { ColumnsMeta, TableMeta } from "@/lib/meta";
+import type { ResourceMeta } from "@/lib/meta";
 
 import type { Project } from "./projects.schema";
 
-export const projectsTableMeta = {
+export const projectsMeta = {
   name: "Projects",
-} as const satisfies TableMeta;
-
-export const projectsColumnsMeta = {
-  id: { label: "ID", type: "number", sortable: true, hidden: true },
-  name: { label: "Name", type: "text", sortable: true, filterable: true },
-  slug: { label: "Slug", type: "text", sortable: true, filterable: true },
-  description: { label: "Description", type: "text" },
-  status: {
-    label: "Status",
-    type: "enum",
-    options: ["active", "archived"],
-    sortable: true,
-    filterable: true,
+  description: "Workspaces that group related tasks.",
+  icon: "FolderKanban",
+  columns: {
+    id: {
+      name: "ID",
+      description: "Unique project identifier.",
+      icon: "Hash",
+      sortable: true,
+      hidden: true,
+    },
+    name: {
+      name: "Name",
+      description: "Display name of the project.",
+      icon: "Type",
+      sortable: true,
+      filterable: true,
+    },
+    slug: {
+      name: "Slug",
+      description: "Unique URL-friendly identifier.",
+      icon: "Link",
+      sortable: true,
+      filterable: true,
+    },
+    description: {
+      name: "Description",
+      description: "What the project is about.",
+      icon: "AlignLeft",
+    },
+    status: {
+      name: "Status",
+      description: "Whether the project is active or archived.",
+      icon: "CircleDot",
+      sortable: true,
+      filterable: true,
+    },
+    createdAt: {
+      name: "Created",
+      description: "When the project was created.",
+      icon: "CalendarPlus",
+      type: "datetime",
+      sortable: true,
+    },
+    updatedAt: {
+      name: "Updated",
+      description: "When the project was last updated.",
+      icon: "CalendarClock",
+      type: "datetime",
+      sortable: true,
+      hidden: true,
+    },
   },
-  createdAt: { label: "Created", type: "datetime", sortable: true },
-  updatedAt: { label: "Updated", type: "datetime", sortable: true, hidden: true },
-} as const satisfies ColumnsMeta<Project>;
+} as const satisfies ResourceMeta<Project>;

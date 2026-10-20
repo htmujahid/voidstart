@@ -1,12 +1,25 @@
+export type ColumnType =
+  | "text"
+  | "number"
+  | "boolean"
+  | "enum"
+  | "date"
+  | "datetime"
+  | "time"
+  | "json"
+  | "array";
+
 export type TableMeta = {
   name: string;
+  description?: string;
+  icon?: string;
 };
 
 export type ColumnMeta = {
-  label: string;
-  type: "text" | "number" | "enum" | "datetime";
-  /** Allowed values, for `enum` columns. */
-  options?: readonly string[];
+  name: string;
+  description?: string;
+  icon?: string;
+  type?: ColumnType;
   sortable?: boolean;
   filterable?: boolean;
   /** Hide from tables by default. */
@@ -15,3 +28,5 @@ export type ColumnMeta = {
 
 /** Metadata for any subset of the row type's columns. */
 export type ColumnsMeta<Row> = { [K in keyof Row]?: ColumnMeta };
+
+export type ResourceMeta<Row> = TableMeta & { columns: ColumnsMeta<Row> };
